@@ -6,6 +6,7 @@ import (
 	"go/format"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
@@ -81,22 +82,28 @@ func (m *Model) parseModelName() {
 func (m *Model) parseFields() error {
 	fields := fmt.Sprintf("ID int64 `json:\"id\" orm:\"pk\"`\n")
 	for _, item := range m.Input.Fields {
-		relationship := m.Input.Relationships[item.Key]
-		if relationship != "" {
-			switch relationship {
-			case BelongsTo:
-				//  TODO
-			case HasOne:
-				//  TODO
-			case HasMany:
-				//  TODO
-			case ManyToMany:
-				//  TODO
-			default:
-				return errors.New("invalid relationship")
-			}
+		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
+	}
+
+	for key, relationship := range m.Input.Relationships {
+		switch relationship {
+		case BelongsTo:
+			fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", key, key, strcase.ToSnake(key))
+		case HasOne:
+			// TODO:
+		case HasMany:
+			fields += fmt.Sprintf("%s []%s `json:\"%s\"`\n", inflection.Plural(key), key, strcase.ToSnake(inflection.Plural(key)))
+		case ManyToMany:
+			// create slice of joining tables
+			tables := []string{strings.ToLower(m.Input.Name), strings.ToLower(key)}
+			// sort them
+			sort.Strings(tables)
+			// create the joining table name
+			r := inflection.Plural(fmt.Sprintf("%s_%s", tables[0], tables[1]))
+			fields += fmt.Sprintf("%s []%s `json:\"%s\" gorm:\"many2many:%s\"`\n", inflection.Plural(key), key, strcase.ToSnake(inflection.Plural(key)), r)
+		default:
+			return errors.New("invalid relationship")
 		}
-		fields += fmt.Sprintf("%s %s `json:\"%s\" %s`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key), relationship)
 	}
 
 	m.ParsedData.Fields = fields

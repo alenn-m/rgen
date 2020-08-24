@@ -72,8 +72,9 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	// Generate model
 	m := new(model.Model)
 	m.Init(&model.Input{
-		Name:   p.Name,
-		Fields: p.Fields,
+		Name:          p.Name,
+		Fields:        p.Fields,
+		Relationships: p.Relationships,
 	}, conf)
 	err := m.Generate()
 	if err != nil {

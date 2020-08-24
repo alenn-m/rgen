@@ -32,6 +32,10 @@ func TestModel_Generate(t *testing.T) {
 					Value: "string",
 				},
 			},
+			Relationships: map[string]string{
+				"User": "belongsTo",
+				"Post": "manyToMany",
+			},
 		},
 		Config:     &config.Config{Package: "github.com/test/testApp"},
 		ParsedData: parsedData{},
