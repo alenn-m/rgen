@@ -1,6 +1,7 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"go/format"
 	"io/ioutil"
@@ -13,11 +14,17 @@ import (
 	"github.com/jinzhu/inflection"
 )
 
+const BelongsTo = "belongsTo"
+const HasOne = "hasOne"
+const HasMany = "hasMany"
+const ManyToMany = "manyToMany"
+
 var dir = "models"
 
 type Input struct {
-	Name   string
-	Fields []parser.Field
+	Name          string
+	Relationships map[string]string
+	Fields        []parser.Field
 }
 
 type Model struct {
@@ -39,7 +46,10 @@ func (m *Model) Init(input *Input, conf *config.Config) {
 
 func (m *Model) Generate() error {
 	m.parseModelName()
-	m.parseFields()
+	err := m.parseFields()
+	if err != nil {
+		return err
+	}
 
 	contentString := TEMPLATE
 	contentString = strings.Replace(contentString, "{{Model}}", m.ParsedData.Name, -1)
@@ -68,13 +78,30 @@ func (m *Model) parseModelName() {
 	m.ParsedData.Name = inflection.Singular(strings.Title(strings.ToLower(m.Input.Name)))
 }
 
-func (m *Model) parseFields() {
+func (m *Model) parseFields() error {
 	fields := fmt.Sprintf("ID int64 `json:\"id\" orm:\"pk\"`\n")
 	for _, item := range m.Input.Fields {
-		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
+		relationship := m.Input.Relationships[item.Key]
+		if relationship != "" {
+			switch relationship {
+			case BelongsTo:
+				//  TODO
+			case HasOne:
+				//  TODO
+			case HasMany:
+				//  TODO
+			case ManyToMany:
+				//  TODO
+			default:
+				return errors.New("invalid relationship")
+			}
+		}
+		fields += fmt.Sprintf("%s %s `json:\"%s\" %s`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key), relationship)
 	}
 
 	m.ParsedData.Fields = fields
+
+	return nil
 }
 
 func (m *Model) saveFile(content []byte, location string) error {
