@@ -54,8 +54,6 @@ func main() {
 		RunMigrations(db)
 	}
 
-	// .Set("gorm:auto_preload", true)
-
 	// memory cache can be replaced with any other type of cache
 	c := cache.New(time.Minute*60*24, 10*time.Minute)
 	caching := memory.NewMemoryCache(c)

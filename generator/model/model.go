@@ -16,7 +16,6 @@ import (
 )
 
 const BelongsTo = "belongsTo"
-const HasOne = "hasOne"
 const HasMany = "hasMany"
 const ManyToMany = "manyToMany"
 
@@ -88,9 +87,7 @@ func (m *Model) parseFields() error {
 	for key, relationship := range m.Input.Relationships {
 		switch relationship {
 		case BelongsTo:
-			fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", key, key, strcase.ToSnake(key))
-		case HasOne:
-			// TODO:
+			fields += fmt.Sprintf("%s *%s `json:\"%s\"`\n", key, key, strcase.ToSnake(key))
 		case HasMany:
 			fields += fmt.Sprintf("%s []%s `json:\"%s\"`\n", inflection.Plural(key), key, strcase.ToSnake(inflection.Plural(key)))
 		case ManyToMany:
