@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"context"
+    "context"
 
 	"{{Root}}/models"
 	authService "{{Root}}/util/auth"
@@ -9,13 +9,12 @@ import (
 
 type Repository interface {
 	Login(context.Context, string, string) (*models.User, error)
-	Signup(context.Context, *SignupReq) (int64, error)
 	Logout(context.Context) error
 }
 
 type DBRepository interface {
 	InsertUser(*models.User) (int64, error)
-	FindByEmailAndPassword(string, string) (*models.User, error)
+	FindByEmail(string) (*models.User, error)
 	FindByToken(string) (*models.User, error)
 	UpdateToken(int64, string) error
 	ClearToken(int64) error

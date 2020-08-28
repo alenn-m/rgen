@@ -5,8 +5,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/alenn-m/myApp/models"
-	"github.com/alenn-m/myApp/util/cache"
+	"{{Root}}/models"
+	"{{Root}}/util/cache"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/jwtauth"
 )

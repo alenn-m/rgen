@@ -13,10 +13,10 @@ func NewAuthDB(client *gorm.DB) *AuthDB {
 	return &AuthDB{client: client}
 }
 
-func (a *AuthDB) FindByEmailAndPassword(email, password string) (*models.User, error) {
+func (a *AuthDB) FindByEmail(email string) (*models.User, error) {
 	var user models.User
 
-	err := a.client.Where("email = ?", email).Where("password = ?", password).Find(&user).Error
+	err := a.client.Where("email = ?", email).Find(&user).Error
 
 	return &user, err
 }

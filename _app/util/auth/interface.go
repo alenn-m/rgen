@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 
-	"github.com/alenn-m/myApp/models"
+	"{{Root}}/models"
 	"github.com/dgrijalva/jwt-go"
 )
 

@@ -9,4 +9,5 @@ require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.2.1
 	github.com/jinzhu/gorm v1.9.14
 	github.com/joho/godotenv v1.3.0 // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 )

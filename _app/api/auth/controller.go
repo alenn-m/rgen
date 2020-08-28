@@ -1,18 +1,28 @@
 package auth
 
 import (
-	"context"
+    "context"
 	"errors"
 
 	"{{Root}}/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
 func (u *AuthController) Login(c context.Context, email, password string) (*models.User, error) {
-	user, err := u.db.FindByEmailAndPassword(email, password)
+	user, err := u.db.FindByEmail(email)
 	if err != nil {
 		return nil, ErrInvalidCredentials
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		if err == bcrypt.ErrMismatchedHashAndPassword {
+			return nil, ErrInvalidCredentials
+		}
+
+		return nil, err
 	}
 
 	token, err := u.auth.GenerateToken(user)
@@ -41,19 +51,4 @@ func (u *AuthController) Logout(c context.Context) error {
 	}
 
 	return nil
-}
-
-func (u *AuthController) Signup(c context.Context, r *SignupReq) (int64, error) {
-	user := models.User{
-		Email:    r.Email,
-		Password: r.Password,
-	}
-
-	token, err := u.auth.GenerateToken(&user)
-	if err != nil {
-		return 0, err
-	}
-	user.ApiToken = token.Raw
-
-	return u.db.InsertUser(&user)
 }

@@ -78,9 +78,7 @@ func (u *{{Model}}DB) Insert(item models.{{Model}}) (int64, error) {
 }
 
 func (u *{{Model}}DB) Update(item models.{{Model}}) error {
-	err := u.client.Save(&item).Error
-
-	return err
+	return u.client.Model(&item).Updates(item).Error
 }
 
 func (u *{{Model}}DB) Delete(id int64) error {
