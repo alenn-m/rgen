@@ -82,8 +82,6 @@ func (u *{{Model}}DB) Update(item models.{{Model}}) error {
 }
 
 func (u *{{Model}}DB) Delete(id int64) error {
-	err := u.client.Where("id = ?", id).Delete(&models.{{Model}}{}).Error
-
-	return err
+	return u.client.Where("id = ?", id).Delete(&models.{{Model}}{}).Error
 }
 `
