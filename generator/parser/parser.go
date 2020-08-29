@@ -12,10 +12,11 @@ type Field struct {
 }
 
 type Parser struct {
-	Name          string
-	Fields        []Field
-	Relationships map[string]string
-	RootDir       string
+	Name           string
+	Fields         []Field
+	Relationships  map[string]string
+	RootDir        string
+	MakeController bool
 }
 
 func (p *Parser) Parse(name, fields, rootDir string) error {

@@ -15,7 +15,8 @@ import (
 var dir = "api"
 
 type Input struct {
-	Name string
+	Name    string
+	Actions []string
 }
 
 type Repository struct {

@@ -43,9 +43,10 @@ var buildCmd = &cobra.Command{
 			}
 
 			p := parser.Parser{
-				Name:          modelName,
-				Fields:        fields,
-				Relationships: item.Relationships,
+				Name:           modelName,
+				Fields:         fields,
+				Relationships:  item.Relationships,
+				MakeController: item.MakeController,
 			}
 
 			err := generate(&p, conf)

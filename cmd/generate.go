@@ -14,12 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const ACTION_ALL = "ALL"
-const ACTION_CREATE = "CREATE"
-const ACTION_READ = "READ"
-const ACTION_UPDATE = "UPDATE"
-const ACTION_DELETE = "DELETE"
-
 var name string
 var fields string
 var actions string
@@ -81,24 +75,34 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		return err
 	}
 
-	// Generate repositories
-	r := new(repository.Repository)
-	r.Init(&repository.Input{Name: p.Name}, conf)
-	err = r.Generate()
-	if err != nil {
-		return err
-	}
+	if p.MakeController {
+		// Generate repositories
+		r := new(repository.Repository)
+		r.Init(&repository.Input{Name: p.Name}, conf)
+		err = r.Generate()
+		if err != nil {
+			return err
+		}
 
-	// Generate controller
-	c := new(controller.Controller)
-	c.Init(&controller.Input{
-		Name:    p.Name,
-		Fields:  p.Fields,
-		Actions: []string{},
-	}, conf)
-	err = c.Generate()
-	if err != nil {
-		return err
+		// Generate controller
+		c := new(controller.Controller)
+		c.Init(&controller.Input{
+			Name:    p.Name,
+			Fields:  p.Fields,
+			Actions: []string{},
+		}, conf)
+		err = c.Generate()
+		if err != nil {
+			return err
+		}
+
+		// Generate services
+		serviceInit := new(service_init.ServiceInit)
+		serviceInit.Init(&service_init.Input{Name: p.Name}, conf)
+		err = serviceInit.Generate()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Generate transport layer
@@ -108,14 +112,6 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		Fields: p.Fields,
 	}, conf)
 	err = t.Generate()
-	if err != nil {
-		return err
-	}
-
-	// Generate services
-	serviceInit := new(service_init.ServiceInit)
-	serviceInit.Init(&service_init.Input{Name: p.Name}, conf)
-	err = serviceInit.Generate()
 	if err != nil {
 		return err
 	}

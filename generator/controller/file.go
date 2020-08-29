@@ -6,10 +6,31 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/alenn-m/rgen/util/misc"
 )
 
 func (c *Controller) createFile(location string) error {
-	contentString := TEMPLATE
+	actions := []string{CONTROLLER_HEADER, CONTROLLER_INDEX, CONTROLLER_STORE, CONTROLLER_UPDATE, CONTROLLER_DELETE}
+
+	if len(c.Input.Actions) > 0 {
+		actions = []string{CONTROLLER_HEADER}
+
+		for _, action := range c.Input.Actions {
+			switch action {
+			case misc.ACTION_READ:
+				actions = append(actions, CONTROLLER_INDEX)
+			case misc.ACTION_CREATE:
+				actions = append(actions, CONTROLLER_STORE)
+			case misc.ACTION_UPDATE:
+				actions = append(actions, CONTROLLER_UPDATE)
+			case misc.ACTION_DELETE:
+				actions = append(actions, CONTROLLER_DELETE)
+			}
+		}
+	}
+
+	contentString := strings.Join(actions, "\n")
 	contentString = strings.Replace(contentString, "{{Package}}", c.ParsedData.Package, -1)
 	contentString = strings.Replace(contentString, "{{Controller}}", c.ParsedData.Controller, -1)
 	contentString = strings.Replace(contentString, "{{Model}}", c.ParsedData.Model, -1)
