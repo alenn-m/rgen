@@ -44,7 +44,7 @@ var generateCmd = &cobra.Command{
 			rootDir = wd
 		}
 
-		err = p.Parse(name, fields, rootDir)
+		err = p.Parse(name, fields, rootDir, actions)
 		if err != nil {
 			log.Error(err.Error())
 			return
@@ -55,10 +55,6 @@ var generateCmd = &cobra.Command{
 			log.Error(err.Error())
 			return
 		}
-
-		// TODO: add support for relationships
-		// TODO: add support for customizable actions (currently all controller actions are created)
-		// TODO: read configuration from yaml file and generate services based on that (it should support validation)
 	},
 }
 
@@ -75,10 +71,13 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		return err
 	}
 
-	if p.MakeController {
+	if !p.SkipController {
 		// Generate repositories
 		r := new(repository.Repository)
-		r.Init(&repository.Input{Name: p.Name}, conf)
+		r.Init(&repository.Input{
+			Name:    p.Name,
+			Actions: p.Actions,
+		}, conf)
 		err = r.Generate()
 		if err != nil {
 			return err
@@ -89,7 +88,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		c.Init(&controller.Input{
 			Name:    p.Name,
 			Fields:  p.Fields,
-			Actions: []string{},
+			Actions: p.Actions,
 		}, conf)
 		err = c.Generate()
 		if err != nil {
@@ -108,8 +107,9 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	// Generate transport layer
 	t := new(transport.Transport)
 	t.Init(&transport.Input{
-		Name:   p.Name,
-		Fields: p.Fields,
+		Name:    p.Name,
+		Fields:  p.Fields,
+		Actions: p.Actions,
 	}, conf)
 	err = t.Generate()
 	if err != nil {

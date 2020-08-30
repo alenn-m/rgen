@@ -104,8 +104,9 @@ var newCmd = &cobra.Command{
 						"LastName":  {"Required"},
 						"Email":     {"Required", "Email"},
 					},
-					Actions:       []string{ACTION_ALL},
-					Relationships: nil,
+					Actions:        []string{},
+					Relationships:  nil,
+					SkipController: false,
 				},
 			},
 		}

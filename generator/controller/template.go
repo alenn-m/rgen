@@ -17,7 +17,7 @@ const CONTROLLER_INDEX = `func (u *{{Controller}}) Index(c context.Context) ([]m
     return items, nil
 }`
 
-const CONTROLLER_STORE = `func (u *{{Controller}}) Store(c context.Context, r *StoreReq) (int64, error) {
+const CONTROLLER_CREATE = `func (u *{{Controller}}) Store(c context.Context, r *StoreReq) (int64, error) {
     id, err := u.db.Insert(models.{{Model}}{
         {{Fields}}
     })

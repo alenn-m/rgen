@@ -11,17 +11,19 @@ import (
 )
 
 func (c *Controller) createFile(location string) error {
-	actions := []string{CONTROLLER_HEADER, CONTROLLER_INDEX, CONTROLLER_STORE, CONTROLLER_UPDATE, CONTROLLER_DELETE}
+	actions := []string{CONTROLLER_HEADER, CONTROLLER_INDEX, CONTROLLER_SHOW, CONTROLLER_CREATE, CONTROLLER_UPDATE, CONTROLLER_DELETE}
 
 	if len(c.Input.Actions) > 0 {
 		actions = []string{CONTROLLER_HEADER}
 
 		for _, action := range c.Input.Actions {
 			switch action {
-			case misc.ACTION_READ:
+			case misc.ACTION_INDEX:
 				actions = append(actions, CONTROLLER_INDEX)
+			case misc.ACTION_SHOW:
+				actions = append(actions, CONTROLLER_SHOW)
 			case misc.ACTION_CREATE:
-				actions = append(actions, CONTROLLER_STORE)
+				actions = append(actions, CONTROLLER_CREATE)
 			case misc.ACTION_UPDATE:
 				actions = append(actions, CONTROLLER_UPDATE)
 			case misc.ACTION_DELETE:

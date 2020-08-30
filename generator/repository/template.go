@@ -1,5 +1,17 @@
 package repository
 
+const DBR_SHOW = "FindByID(int64) (*models.{{Model}}, error)"
+const DBR_INDEX = "ListAll() ([]models.{{Model}}, error)"
+const DBR_CREATE = "Insert(models.{{Model}}) (int64, error)"
+const DBR_UPDATE = "Update(models.{{Model}}) error"
+const DBR_DELETE = "Delete(int64) error"
+
+const R_SHOW = "Show(context.Context, int64) (*models.{{Model}}, error)"
+const R_INDEX = "Index(context.Context) ([]models.{{Model}}, error)"
+const R_CREATE = "Store(context.Context, *StoreReq) (int64, error)"
+const R_UPDATE = "Update(context.Context, *UpdateReq, int64) error"
+const R_DELETE = "Delete(context.Context, int64) error"
+
 const TEMPLATE = `
 package {{Package}}
 
@@ -11,11 +23,7 @@ import (
 )
 
 type DBRepository interface {
-	FindByID(int64) (*models.{{Model}}, error)
-	ListAll() ([]models.{{Model}}, error)
-	Insert(models.{{Model}}) (int64, error)
-	Update(models.{{Model}}) error
-	Delete(int64) error
+    {{DBRepositoryActions}}
 }
 
 type {{Controller}} struct {
@@ -24,11 +32,7 @@ type {{Controller}} struct {
 }
 
 type Repository interface {
-	Index(context.Context) ([]models.{{Model}}, error)
-	Store(context.Context, *StoreReq) (int64, error)
-	Show(context.Context, int64) (*models.{{Model}}, error)
-	Update(context.Context, *UpdateReq, int64) error
-	Delete(context.Context, int64) error
+    {{RepositoryActions}}
 }
 
 func NewController(db DBRepository, auth *authService.AuthService) *{{Controller}} {
@@ -39,7 +43,7 @@ func NewController(db DBRepository, auth *authService.AuthService) *{{Controller
 }
 `
 
-const MYSQL_TEMPLATE = `
+const MYSQL_TEMPLATE_HEADER = `
 package mysql
 
 import (
@@ -53,35 +57,34 @@ type {{Model}}DB struct {
 
 func New{{Model}}DB(client *gorm.DB) *{{Model}}DB {
 	return &{{Model}}DB{client: client}
-}
+}`
 
-func (u *{{Model}}DB) FindByID(id int64) (*models.{{Model}}, error) {
+const MYSQL_TEMPLATE_SHOW = `func (u *{{Model}}DB) FindByID(id int64) (*models.{{Model}}, error) {
 	var item models.{{Model}}
 
 	err := u.client.Where("id = ?", id).Find(&item).Error
 
 	return &item, err
-}
+}`
 
-func (u *{{Model}}DB) ListAll() ([]models.{{Model}}, error) {
+const MYSQL_TEMPLATE_INDEX = `func (u *{{Model}}DB) ListAll() ([]models.{{Model}}, error) {
 	var items []models.{{Model}}
 
 	err := u.client.Find(&items).Error
 
 	return items, err
-}
+}`
 
-func (u *{{Model}}DB) Insert(item models.{{Model}}) (int64, error) {
+const MYSQL_TEMPLATE_CREATE = `func (u *{{Model}}DB) Insert(item models.{{Model}}) (int64, error) {
 	err := u.client.Create(&item).Error
 
 	return item.ID, err
-}
+}`
 
-func (u *{{Model}}DB) Update(item models.{{Model}}) error {
+const MYSQL_TEMPLATE_UPDATE = `func (u *{{Model}}DB) Update(item models.{{Model}}) error {
 	return u.client.Model(&item).Updates(item).Error
-}
+}`
 
-func (u *{{Model}}DB) Delete(id int64) error {
+const MYSQL_TEMPLATE_DELETE = `func (u *{{Model}}DB) Delete(id int64) error {
 	return u.client.Where("id = ?", id).Delete(&models.{{Model}}{}).Error
-}
-`
+}`

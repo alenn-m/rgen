@@ -16,12 +16,18 @@ type Parser struct {
 	Fields         []Field
 	Relationships  map[string]string
 	RootDir        string
-	MakeController bool
+	SkipController bool
+	Actions        []string
 }
 
-func (p *Parser) Parse(name, fields, rootDir string) error {
+func (p *Parser) Parse(name, fields, rootDir, actions string) error {
 	// Note: currently unused
 	p.RootDir = rootDir
+
+	splitActions := strings.Split(actions, ",")
+	for _, item := range splitActions {
+		p.Actions = append(p.Actions, strings.TrimSpace(item))
+	}
 
 	fs := []Field{}
 

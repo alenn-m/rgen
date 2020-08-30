@@ -6,7 +6,7 @@ type Draft struct {
 
 type ModelOptions struct {
 	Properties     map[string]string   `yaml:"Properties"`
-	MakeController bool                `yaml:"MakeController"`
+	SkipController bool                `yaml:"SkipController"`
 	Validation     map[string][]string `yaml:"Validation"`
 	Actions        []string            `yaml:"Actions"`
 	Relationships  map[string]string   `yaml:"Relationships"`

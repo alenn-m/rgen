@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/alenn-m/rgen/util/config"
+	"github.com/alenn-m/rgen/util/misc"
 	"github.com/jinzhu/inflection"
 )
 
@@ -41,7 +42,44 @@ func (r *Repository) Generate() error {
 	r.parseController()
 	r.parsePackage()
 
+	mysqlActions := []string{MYSQL_TEMPLATE_HEADER, MYSQL_TEMPLATE_INDEX, MYSQL_TEMPLATE_SHOW, MYSQL_TEMPLATE_CREATE, MYSQL_TEMPLATE_UPDATE, MYSQL_TEMPLATE_DELETE}
+	dbRepositoryActions := []string{DBR_INDEX, DBR_SHOW, DBR_CREATE, DBR_UPDATE, DBR_DELETE}
+	repositoryActions := []string{R_INDEX, R_SHOW, R_CREATE, R_UPDATE, R_DELETE}
+
+	if len(r.Input.Actions) > 0 {
+		mysqlActions = []string{MYSQL_TEMPLATE_HEADER}
+		dbRepositoryActions = []string{}
+		repositoryActions = []string{}
+
+		for _, action := range r.Input.Actions {
+			switch action {
+			case misc.ACTION_INDEX:
+				mysqlActions = append(mysqlActions, MYSQL_TEMPLATE_INDEX)
+				dbRepositoryActions = append(dbRepositoryActions, DBR_INDEX)
+				repositoryActions = append(repositoryActions, R_INDEX)
+			case misc.ACTION_SHOW:
+				mysqlActions = append(mysqlActions, MYSQL_TEMPLATE_SHOW)
+				dbRepositoryActions = append(dbRepositoryActions, DBR_SHOW)
+				repositoryActions = append(repositoryActions, R_SHOW)
+			case misc.ACTION_CREATE:
+				mysqlActions = append(mysqlActions, MYSQL_TEMPLATE_CREATE)
+				dbRepositoryActions = append(dbRepositoryActions, DBR_CREATE)
+				repositoryActions = append(repositoryActions, R_CREATE)
+			case misc.ACTION_UPDATE:
+				mysqlActions = append(mysqlActions, MYSQL_TEMPLATE_UPDATE)
+				dbRepositoryActions = append(dbRepositoryActions, DBR_UPDATE)
+				repositoryActions = append(repositoryActions, R_UPDATE)
+			case misc.ACTION_DELETE:
+				mysqlActions = append(mysqlActions, MYSQL_TEMPLATE_DELETE)
+				dbRepositoryActions = append(dbRepositoryActions, DBR_DELETE)
+				repositoryActions = append(repositoryActions, R_DELETE)
+			}
+		}
+	}
+
 	contentString := TEMPLATE
+	contentString = strings.Replace(contentString, "{{DBRepositoryActions}}", strings.Join(dbRepositoryActions, "\n"), -1)
+	contentString = strings.Replace(contentString, "{{RepositoryActions}}", strings.Join(repositoryActions, "\n"), -1)
 	contentString = strings.Replace(contentString, "{{Model}}", r.ParsedData.Model, -1)
 	contentString = strings.Replace(contentString, "{{Package}}", r.ParsedData.Package, -1)
 	contentString = strings.Replace(contentString, "{{Controller}}", r.ParsedData.Controller, -1)
@@ -68,7 +106,7 @@ func (r *Repository) Generate() error {
 		return err
 	}
 
-	contentString = MYSQL_TEMPLATE
+	contentString = strings.Join(mysqlActions, "\n")
 	contentString = strings.Replace(contentString, "{{Model}}", r.ParsedData.Model, -1)
 	contentString = strings.Replace(contentString, "{{Root}}", r.Config.Package, -1)
 
