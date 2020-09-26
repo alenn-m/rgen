@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/alenn-m/rgen/generator/controller"
@@ -11,19 +12,7 @@ import (
 	"github.com/alenn-m/rgen/generator/transport"
 	"github.com/alenn-m/rgen/util/config"
 	"github.com/spf13/cobra"
-	"log"
 )
-
-const ACTION_ALL = "ALL"
-const ACTION_INDEX = "INDEX"
-const ACTION_CREATE = "CREATE"
-const ACTION_READ = "READ"
-const ACTION_UPDATE = "UPDATE"
-const ACTION_DELETE = "DELETE"
-
-var ACTIONS = []string{
-	ACTION_INDEX, ACTION_CREATE, ACTION_READ, ACTION_UPDATE, ACTION_DELETE,
-}
 
 var name string
 var fields string
@@ -88,8 +77,8 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		err = r.Generate()
 		if err != nil {
 			log.Println(err.Error())
-		return err
-	}
+			return err
+		}
 
 		// Generate controller
 		c := new(controller.Controller)
@@ -101,7 +90,8 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		err = c.Generate()
 		if err != nil {
 			log.Println(err.Error())
-		return err}
+			return err
+		}
 
 		// Generate services
 		serviceInit := new(service_init.ServiceInit)
@@ -151,7 +141,7 @@ func init() {
 
 	generateCmd.PersistentFlags().StringVar(&name, "name", "", "Resource name (required)")
 	generateCmd.PersistentFlags().StringVar(&fields, "fields", "", "List of fields (required)")
-	generateCmd.PersistentFlags().StringVar(&actions, "actions", "all", "CRUD actions (default = 'all'")
+	generateCmd.PersistentFlags().StringVar(&actions, "actions", "", "CRUD actions")
 
 	_ = generateCmd.MarkFlagRequired("name")
 	_ = generateCmd.MarkFlagRequired("fields")

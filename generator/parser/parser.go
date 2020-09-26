@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alenn-m/rgen/cmd"
 	"github.com/alenn-m/rgen/util/log"
+	"github.com/alenn-m/rgen/util/misc"
 )
 
 type Field struct {
@@ -15,10 +15,11 @@ type Field struct {
 }
 
 type Parser struct {
-	Name          string
-	Fields        []Field
-	Actions       []string
-	Relationships map[string]string
+	Name           string
+	Fields         []Field
+	Actions        []string
+	Relationships  map[string]string
+	SkipController bool
 }
 
 func (p *Parser) Parse(name, fields, actions string) error {
@@ -40,24 +41,28 @@ func (p *Parser) Parse(name, fields, actions string) error {
 		}
 	}
 
-	a := strings.Split(strings.TrimSpace(actions), ",")
-	for _, item := range a {
-		currentAction := strings.ToUpper(item)
-		found := false
-		for _, action := range cmd.ACTIONS {
-			if action == currentAction {
-				found = true
-				break
+	if actions != "" {
+		a := strings.Split(strings.TrimSpace(actions), ",")
+		for _, item := range a {
+			currentAction := strings.ToUpper(strings.TrimSpace(item))
+			found := false
+			for _, action := range misc.ACTIONS {
+				if action == currentAction {
+					found = true
+					break
+				}
 			}
-		}
 
-		if !found {
-			log.Warning(fmt.Sprintf("Action '%s' is not found, use one of the following [%s]",
-				currentAction, strings.Join(cmd.ACTIONS, ", ")))
-			continue
-		}
+			if !found {
+				log.Warning(fmt.Sprintf("Action '%s' is not found, use one of the following [%s]",
+					currentAction, strings.Join(misc.ACTIONS, ", ")))
+				continue
+			}
 
-		p.Actions = append(p.Actions, currentAction)
+			p.Actions = append(p.Actions, currentAction)
+		}
+	} else {
+		p.Actions = misc.ACTIONS
 	}
 
 	p.Name = strings.TrimSpace(name)
