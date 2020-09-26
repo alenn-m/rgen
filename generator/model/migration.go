@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/alenn-m/rgen/util/files"
 )
 
 func (m *Model) SetupAutoMigration() error {
@@ -40,6 +42,14 @@ func (m *Model) SetupAutoMigration() error {
 
 		return nil
 	})
+
+	// in case someone removed this file, let's create it again
+	if !files.FileExists("migrations.go") {
+		err = ioutil.WriteFile("migrations.go", []byte(""), 0644)
+		if err != nil {
+			return err
+		}
+	}
 
 	migrationsLocation, err := filepath.Abs("migrations.go")
 	if err != nil {

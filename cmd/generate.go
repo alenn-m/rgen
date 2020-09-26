@@ -10,15 +10,20 @@ import (
 	"github.com/alenn-m/rgen/generator/service_init"
 	"github.com/alenn-m/rgen/generator/transport"
 	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/log"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 const ACTION_ALL = "ALL"
+const ACTION_INDEX = "INDEX"
 const ACTION_CREATE = "CREATE"
 const ACTION_READ = "READ"
 const ACTION_UPDATE = "UPDATE"
 const ACTION_DELETE = "DELETE"
+
+var ACTIONS = []string{
+	ACTION_INDEX, ACTION_CREATE, ACTION_READ, ACTION_UPDATE, ACTION_DELETE,
+}
 
 var name string
 var fields string
@@ -32,39 +37,30 @@ var generateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {
-			log.Error(err.Error())
+			log.Println(err.Error())
 			return
 		}
 
 		conf, err := loadConfig(wd)
 		if err != nil {
-			log.Error(err.Error())
+			log.Println(err.Error())
 			return
 		}
 
 		// Initialize parser
 		p := new(parser.Parser)
 
-		// Determine the root directory
-		if rootDir == "" {
-			rootDir = wd
-		}
-
-		err = p.Parse(name, fields, rootDir)
+		err = p.Parse(name, fields, actions)
 		if err != nil {
-			log.Error(err.Error())
+			log.Println(err.Error())
 			return
 		}
 
 		err = generate(p, conf)
 		if err != nil {
-			log.Error(err.Error())
+			log.Println(err.Error())
 			return
 		}
-
-		// TODO: add support for relationships
-		// TODO: add support for customizable actions (currently all controller actions are created)
-		// TODO: read configuration from yaml file and generate services based on that (it should support validation)
 	},
 }
 
@@ -78,6 +74,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	}, conf)
 	err := m.Generate()
 	if err != nil {
+		log.Println(err.Error())
 		return err
 	}
 
@@ -86,6 +83,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	r.Init(&repository.Input{Name: p.Name}, conf)
 	err = r.Generate()
 	if err != nil {
+		log.Println(err.Error())
 		return err
 	}
 
@@ -98,6 +96,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	}, conf)
 	err = c.Generate()
 	if err != nil {
+		log.Println(err.Error())
 		return err
 	}
 
@@ -109,6 +108,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	}, conf)
 	err = t.Generate()
 	if err != nil {
+		log.Println(err.Error())
 		return err
 	}
 
@@ -117,13 +117,17 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	serviceInit.Init(&service_init.Input{Name: p.Name}, conf)
 	err = serviceInit.Generate()
 	if err != nil {
+		log.Println(err.Error())
 		return err
 	}
 
 	// Initiate auto migrations
-	err = m.SetupAutoMigration()
-	if err != nil {
-		return err
+	if conf.AutoMigrations {
+		err = m.SetupAutoMigration()
+		if err != nil {
+			log.Println(err.Error())
+			return err
+		}
 	}
 
 	return nil

@@ -74,7 +74,8 @@ var newCmd = &cobra.Command{
 		}
 
 		config := config.Config{
-			Package: rootPackage,
+			Package:        rootPackage,
+			AutoMigrations: true,
 		}
 
 		configData, err := yaml.Marshal(config)

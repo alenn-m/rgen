@@ -4,6 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/alenn-m/rgen/cmd"
+	"github.com/alenn-m/rgen/util/log"
 )
 
 type Field struct {
@@ -14,16 +17,11 @@ type Field struct {
 type Parser struct {
 	Name          string
 	Fields        []Field
+	Actions       []string
 	Relationships map[string]string
-	RootDir       string
 }
 
-func (p *Parser) Parse(name, fields, rootDir string) error {
-	// Note: currently unused
-	p.RootDir = rootDir
-
-	fs := []Field{}
-
+func (p *Parser) Parse(name, fields, actions string) error {
 	f := strings.Split(strings.TrimSpace(fields), ",")
 	for _, item := range f {
 		t := strings.Split(item, ":")
@@ -34,7 +32,7 @@ func (p *Parser) Parse(name, fields, rootDir string) error {
 				Value: value,
 			}
 
-			fs = append(fs, field)
+			p.Fields = append(p.Fields, field)
 		} else if t[0] == "" {
 			return errors.New("fields are required")
 		} else {
@@ -42,7 +40,26 @@ func (p *Parser) Parse(name, fields, rootDir string) error {
 		}
 	}
 
-	p.Fields = fs
+	a := strings.Split(strings.TrimSpace(actions), ",")
+	for _, item := range a {
+		currentAction := strings.ToUpper(item)
+		found := false
+		for _, action := range cmd.ACTIONS {
+			if action == currentAction {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			log.Warning(fmt.Sprintf("Action '%s' is not found, use one of the following [%s]",
+				currentAction, strings.Join(cmd.ACTIONS, ", ")))
+			continue
+		}
+
+		p.Actions = append(p.Actions, currentAction)
+	}
+
 	p.Name = strings.TrimSpace(name)
 
 	return nil

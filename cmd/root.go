@@ -16,8 +16,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var rootDir string
-
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "generate",
@@ -48,8 +46,6 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&rootDir, "dir", "", "root directory of the project (default is current working directory)")
 }
 
 // initConfig reads in config file and ENV variables if set.
