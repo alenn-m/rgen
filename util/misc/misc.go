@@ -1,0 +1,7 @@
+package misc
+
+const ACTION_CREATE = "CREATE"
+const ACTION_SHOW = "SHOW"
+const ACTION_INDEX = "INDEX"
+const ACTION_UPDATE = "UPDATE"
+const ACTION_DELETE = "DELETE"

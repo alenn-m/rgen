@@ -78,33 +78,46 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		return err
 	}
 
-	// Generate repositories
-	r := new(repository.Repository)
-	r.Init(&repository.Input{Name: p.Name}, conf)
-	err = r.Generate()
-	if err != nil {
-		log.Println(err.Error())
+	if !p.SkipController {
+		// Generate repositories
+		r := new(repository.Repository)
+		r.Init(&repository.Input{
+			Name:    p.Name,
+			Actions: p.Actions,
+		}, conf)
+		err = r.Generate()
+		if err != nil {
+			log.Println(err.Error())
 		return err
 	}
 
-	// Generate controller
-	c := new(controller.Controller)
-	c.Init(&controller.Input{
-		Name:    p.Name,
-		Fields:  p.Fields,
-		Actions: []string{},
-	}, conf)
-	err = c.Generate()
-	if err != nil {
-		log.Println(err.Error())
-		return err
+		// Generate controller
+		c := new(controller.Controller)
+		c.Init(&controller.Input{
+			Name:    p.Name,
+			Fields:  p.Fields,
+			Actions: p.Actions,
+		}, conf)
+		err = c.Generate()
+		if err != nil {
+			log.Println(err.Error())
+		return err}
+
+		// Generate services
+		serviceInit := new(service_init.ServiceInit)
+		serviceInit.Init(&service_init.Input{Name: p.Name}, conf)
+		err = serviceInit.Generate()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Generate transport layer
 	t := new(transport.Transport)
 	t.Init(&transport.Input{
-		Name:   p.Name,
-		Fields: p.Fields,
+		Name:    p.Name,
+		Fields:  p.Fields,
+		Actions: p.Actions,
 	}, conf)
 	err = t.Generate()
 	if err != nil {

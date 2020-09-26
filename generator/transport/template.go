@@ -1,6 +1,19 @@
 package transport
 
-const TEMPLATE = `
+const T_INDEX = `		// Index
+		r.Get("/", a.index)`
+
+const T_CREATE = `		// Create
+		r.Post("/", a.store)`
+
+const T_SHOW = `		// Show
+		r.Get("/{id}", a.show)`
+const T_UPDATE = `		// Update
+		r.Put("/{id}", a.update)`
+const T_DELETE = `// Delete
+		r.Delete("/{id}", a.delete)`
+
+const TRANSPORT_HEADER = `
 package {{Package}}
 
 import (
@@ -24,20 +37,11 @@ const PREFIX = "{{Prefix}}"
 func New(router chi.Router, svc Repository) {
 	a := API{svc: svc}
 	router = router.Route(fmt.Sprintf("/%s", PREFIX), func(r chi.Router) {
-		// Index
-		r.Get("/", a.index)
-		// Create
-		r.Post("/", a.store)
-		// Show
-		r.Get("/{id}", a.show)
-		// Update
-		r.Put("/{id}", a.update)
-		// Delete
-		r.Delete("/{id}", a.delete)
+        {{TransportActions}}
 	})
-}
+}`
 
-func (a *API) index(w http.ResponseWriter, r *http.Request) {
+const TRANSPORT_INDEX = `func (a *API) index(w http.ResponseWriter, r *http.Request) {
 	result, err := a.svc.Index(r.Context())
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
@@ -45,9 +49,9 @@ func (a *API) index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.ReturnSuccess(w, result)
-}
+}`
 
-type StoreReq struct {
+const TRANSPORT_CREATE = `type StoreReq struct {
 	{{Fields}}
 }
 
@@ -71,9 +75,9 @@ func (a *API) store(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.ReturnSuccess(w, id)
-}
+}`
 
-func (a *API) show(w http.ResponseWriter, r *http.Request) {
+const TRANSPORT_SHOW = `func (a *API) show(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
@@ -87,9 +91,9 @@ func (a *API) show(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.ReturnSuccess(w, result)
-}
+}`
 
-type UpdateReq struct {
+const TRANSPORT_UPDATE = `type UpdateReq struct {
 	{{Fields}}
 }
 
@@ -119,21 +123,20 @@ func (a *API) update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp.ReturnSuccess(w, nil)
-}
+}`
 
-func (a *API) delete(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+const TRANSPORT_DELETE = `func (a *API) delete(w http.ResponseWriter, r *http.Request) {
+    id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+    if err != nil {
+        resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	err = a.svc.Delete(r.Context(), id)
-	if err != nil {
-		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+    err = a.svc.Delete(r.Context(), id)
+    if err != nil {
+        resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
 
-	resp.ReturnSuccess(w, nil)
-}
-`
+    resp.ReturnSuccess(w, nil)
+}`

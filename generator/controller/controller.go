@@ -30,7 +30,6 @@ type parsedData struct {
 }
 
 func (c *Controller) Init(input *Input, conf *config.Config) {
-	// TODO: parse actions into array of strings, for now all actions are created
 	c.Input = input
 	c.Config = conf
 }

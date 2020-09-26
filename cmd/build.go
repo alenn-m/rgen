@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/log"
@@ -43,9 +44,11 @@ var buildCmd = &cobra.Command{
 			}
 
 			p := parser.Parser{
-				Name:          modelName,
-				Fields:        fields,
-				Relationships: item.Relationships,
+				Name:           modelName,
+				Fields:         fields,
+				Relationships:  item.Relationships,
+				SkipController: item.SkipController,
+				Actions:        actionsToUpper(item.Actions),
 			}
 
 			err := generate(&p, conf)
@@ -57,6 +60,15 @@ var buildCmd = &cobra.Command{
 
 		log.Info(fmt.Sprintf("Built API for %d model(s)", len(drft.Models)))
 	},
+}
+
+func actionsToUpper(input []string) []string {
+	output := []string{}
+	for _, item := range input {
+		output = append(output, strings.ToUpper(item))
+	}
+
+	return output
 }
 
 func init() {
