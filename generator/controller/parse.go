@@ -24,13 +24,13 @@ func (c *Controller) parsePackage() *Controller {
 }
 
 func (c *Controller) parseControllerName() *Controller {
-	c.ParsedData.Controller = fmt.Sprintf("%sController", strings.Title(strings.ToLower(inflection.Plural(c.Input.Name))))
+	c.ParsedData.Controller = fmt.Sprintf("%sController", strings.Title(inflection.Plural(c.Input.Name)))
 
 	return c
 }
 
 func (c *Controller) parseModelName() *Controller {
-	c.ParsedData.Model = strings.Title(strings.ToLower(inflection.Singular(c.Input.Name)))
+	c.ParsedData.Model = strings.Title(inflection.Singular(c.Input.Name))
 
 	return c
 }

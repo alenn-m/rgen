@@ -12,7 +12,8 @@ import (
 )
 
 type Input struct {
-	Name string
+	LowerCaseName string
+	Name          string
 }
 
 type ServiceInit struct {
@@ -24,7 +25,8 @@ func (s *ServiceInit) Init(input *Input, conf *config.Config) {
 	s.Input = input
 	s.Config = conf
 
-	s.Input.Name = strings.ToLower(inflection.Singular(s.Input.Name))
+	s.Input.LowerCaseName = strings.ToLower(inflection.Singular(s.Input.Name))
+	s.Input.Name = inflection.Singular(s.Input.Name)
 }
 
 func (s *ServiceInit) Generate() error {
@@ -33,22 +35,23 @@ func (s *ServiceInit) Generate() error {
 		return err
 	}
 
-	mainFile, err := ioutil.ReadFile(mainFilePath)
-	if err != nil {
-		return err
-	}
+	// mainFile, err := ioutil.ReadFile(mainFilePath)
+	// if err != nil {
+	// 	return err
+	// }
 
-	f := string(mainFile)
+	// f := string(mainFile)
+	f := "test"
 
-	service := fmt.Sprintf(`"%s/api/%s"`, s.Config.Package, s.Input.Name)
-	repo := fmt.Sprintf(`%sDB "%s/api/%s/repositories/mysql"`, s.Input.Name, s.Config.Package, s.Input.Name)
+	service := fmt.Sprintf(`"%s/api/%s"`, s.Config.Package, s.Input.LowerCaseName)
+	repo := fmt.Sprintf(`%sDB "%s/api/%s/repositories/mysql"`, s.Input.LowerCaseName, s.Config.Package, s.Input.LowerCaseName)
 	if !strings.Contains(f, service) && !strings.Contains(f, repo) {
 		importToInsert := fmt.Sprintf("%s\n%s", service, repo)
 
 		serviceInitToInsert := fmt.Sprintf(`// %s
 			%s.New(r, %s.NewController(
 				%sDB.New%sDB(db), authSvc),
-			)`, inflection.Plural(s.Input.Name), s.Input.Name, s.Input.Name, s.Input.Name, strings.Title(s.Input.Name))
+			)`, inflection.Plural(s.Input.LowerCaseName), s.Input.LowerCaseName, s.Input.LowerCaseName, s.Input.LowerCaseName, strings.Title(s.Input.Name))
 
 		servicesIndex := strings.Index(f, "// [services]") + 13
 		f = f[:servicesIndex] + fmt.Sprintf("\n%s\n", importToInsert) + f[servicesIndex:]

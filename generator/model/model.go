@@ -75,7 +75,7 @@ func (m *Model) Generate() error {
 }
 
 func (m *Model) parseModelName() {
-	m.ParsedData.Name = inflection.Singular(strings.Title(strings.ToLower(m.Input.Name)))
+	m.ParsedData.Name = inflection.Singular(strings.Title(m.Input.Name))
 }
 
 func (m *Model) parseFields() error {

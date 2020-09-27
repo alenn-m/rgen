@@ -75,7 +75,7 @@ func (t *Transport) parsePackage() *Transport {
 }
 
 func (t *Transport) parseModelName() *Transport {
-	t.ParsedData.Model = strings.Title(strings.ToLower(inflection.Singular(t.Input.Name)))
+	t.ParsedData.Model = strings.Title(inflection.Singular(t.Input.Name))
 
 	return t
 }

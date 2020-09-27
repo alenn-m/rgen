@@ -149,7 +149,7 @@ func (r *Repository) makeDirIfNotExist(location string) error {
 }
 
 func (r *Repository) parseModel() {
-	r.ParsedData.Model = strings.Title(strings.ToLower(inflection.Singular(r.Input.Name)))
+	r.ParsedData.Model = strings.Title(inflection.Singular(r.Input.Name))
 }
 
 func (r *Repository) parsePackage() {
@@ -157,7 +157,7 @@ func (r *Repository) parsePackage() {
 }
 
 func (r *Repository) parseController() {
-	r.ParsedData.Controller = strings.Title(strings.ToLower(inflection.Plural(r.Input.Name))) + "Controller"
+	r.ParsedData.Controller = strings.Title(inflection.Plural(r.Input.Name)) + "Controller"
 }
 
 func (r *Repository) saveFile(content []byte, location string) error {
