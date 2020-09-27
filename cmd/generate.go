@@ -139,9 +139,9 @@ func generate(p *parser.Parser, conf *config.Config) error {
 func init() {
 	rootCmd.AddCommand(generateCmd)
 
-	generateCmd.PersistentFlags().StringVar(&name, "name", "", "Resource name (required)")
-	generateCmd.PersistentFlags().StringVar(&fields, "fields", "", "List of fields (required)")
-	generateCmd.PersistentFlags().StringVar(&actions, "actions", "", "CRUD actions")
+	generateCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "Resource name (required) --name='ModelName'")
+	generateCmd.PersistentFlags().StringVarP(&fields, "fields", "f", "", "List of fields (required) --fields='Title:string, Description:string, UserID:int64'")
+	generateCmd.PersistentFlags().StringVarP(&actions, "actions", "a", "", "CRUD actions --actions='index,create,show,update,delete'")
 
 	_ = generateCmd.MarkFlagRequired("name")
 	_ = generateCmd.MarkFlagRequired("fields")
