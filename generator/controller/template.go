@@ -8,8 +8,8 @@ import (
 
     "{{Root}}/models"
 )`
-const CONTROLLER_INDEX = `func (u *{{Controller}}) Index(c context.Context) ([]models.{{Model}}, error) {
-    items, err := u.db.ListAll()
+const CONTROLLER_INDEX = `func (u *{{Controller}}) Index(c context.Context, page int) ([]models.{{Model}}, error) {
+    items, err := u.db.ListAll(page)
     if err != nil {
         return nil, err
     }

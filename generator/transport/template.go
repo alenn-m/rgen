@@ -23,6 +23,7 @@ import (
 
 	"{{Root}}/util/req"
 	"{{Root}}/util/resp"
+    "{{Root}}/util/paginate"
 	"github.com/go-chi/chi"
 	// . "github.com/go-ozzo/ozzo-validation/v4"
 	// "github.com/go-ozzo/ozzo-validation/v4/is"
@@ -42,7 +43,9 @@ func New(router chi.Router, svc Repository) {
 }`
 
 const TRANSPORT_INDEX = `func (a *API) index(w http.ResponseWriter, r *http.Request) {
-	result, err := a.svc.Index(r.Context())
+	pReq := paginate.ParsePaginationReq(r)
+
+	result, err := a.svc.Index(r.Context(), pReq.Page)
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
 		return

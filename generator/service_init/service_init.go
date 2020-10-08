@@ -35,13 +35,12 @@ func (s *ServiceInit) Generate() error {
 		return err
 	}
 
-	// mainFile, err := ioutil.ReadFile(mainFilePath)
-	// if err != nil {
-	// 	return err
-	// }
+	mainFile, err := ioutil.ReadFile(mainFilePath)
+	if err != nil {
+		return err
+	}
 
-	// f := string(mainFile)
-	f := "test"
+	f := string(mainFile)
 
 	service := fmt.Sprintf(`"%s/api/%s"`, s.Config.Package, s.Input.LowerCaseName)
 	repo := fmt.Sprintf(`%sDB "%s/api/%s/repositories/mysql"`, s.Input.LowerCaseName, s.Config.Package, s.Input.LowerCaseName)

@@ -1,13 +1,13 @@
 package repository
 
 const DBR_SHOW = "FindByID(int64) (*models.{{Model}}, error)"
-const DBR_INDEX = "ListAll() ([]models.{{Model}}, error)"
+const DBR_INDEX = "ListAll(int) ([]models.{{Model}}, error)"
 const DBR_CREATE = "Insert(models.{{Model}}) (int64, error)"
 const DBR_UPDATE = "Update(models.{{Model}}) error"
 const DBR_DELETE = "Delete(int64) error"
 
 const R_SHOW = "Show(context.Context, int64) (*models.{{Model}}, error)"
-const R_INDEX = "Index(context.Context) ([]models.{{Model}}, error)"
+const R_INDEX = "Index(context.Context, int) ([]models.{{Model}}, error)"
 const R_CREATE = "Store(context.Context, *StoreReq) (int64, error)"
 const R_UPDATE = "Update(context.Context, *UpdateReq, int64) error"
 const R_DELETE = "Delete(context.Context, int64) error"
@@ -48,6 +48,7 @@ package mysql
 
 import (
 	"{{Root}}/models"
+    "{{Root}}/util/paginate"
 	"github.com/jinzhu/gorm"
 )
 
@@ -67,10 +68,10 @@ const MYSQL_TEMPLATE_SHOW = `func (u *{{Model}}DB) FindByID(id int64) (*models.{
 	return &item, err
 }`
 
-const MYSQL_TEMPLATE_INDEX = `func (u *{{Model}}DB) ListAll() ([]models.{{Model}}, error) {
+const MYSQL_TEMPLATE_INDEX = `func (u *{{Model}}DB) ListAll(page int) ([]models.{{Model}}, error) {
 	var items []models.{{Model}}
 
-	err := u.client.Find(&items).Error
+    err := paginate.Paginate(u.client.New(), page).Find(&items).Error
 
 	return items, err
 }`
