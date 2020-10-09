@@ -109,7 +109,7 @@ Flags:
   -h, --help             help for generate
   -n, --name string      Resource name (required) --name='ModelName'
 ```
-**Example: ** To create a *Comment* resource with *title, body* and *user_id* fields run the following command:
+**Example:** To create a *Comment* resource with *title, body* and *user_id* fields run the following command:
 ```
 rgen generate -n "Comment" -f "title:string, body:string, user_id:int64" -a "index, create, delete"
 ```
