@@ -20,7 +20,6 @@ import (
 var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Initializes the REST API",
-	Long:  `...`,
 	Run: func(cmd *cobra.Command, args []string) {
 		log.Info("Creating new application")
 

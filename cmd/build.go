@@ -14,7 +14,6 @@ import (
 var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Builds API from YAML file",
-	Long:  `...`,
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {

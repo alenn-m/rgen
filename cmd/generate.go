@@ -22,7 +22,6 @@ var actions string
 var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generates API CRUD with given configuration",
-	Long:  `...`,
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {
