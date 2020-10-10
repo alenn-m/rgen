@@ -86,6 +86,55 @@ SkipController is a boolean value which indicates if you want to create a contro
 The default value is **true**.\
 If the SkipController is false then only a model will be created.
 
+### File structure
+
+```
+.
+├── api
+│   ├── auth
+│   │   ├── controller.go
+│   │   ├── repositories
+│   │   │   └── mysql
+│   │   │       └── auth.go
+│   │   ├── repository.go
+│   │   └── transport.go
+│   └── user
+│       ├── controller.go
+│       ├── repositories
+│       │   └── mysql
+│       │       └── user.go
+│       ├── repository.go
+│       └── transport.go
+├── config.yaml
+├── draft.yaml
+├── go.mod
+├── go.sum
+├── main.go
+├── middleware
+│   ├── AuthMiddleware.go
+│   └── ExampleMiddleware.go
+├── migrations.go
+├── models
+│   ├── Base.go
+│   └── User.go
+└── util
+    ├── auth
+    │   ├── auth.go
+    │   └── interface.go
+    ├── cache
+    │   ├── memory
+    │   │   └── memory.go
+    │   └── service.go
+    ├── paginate
+    │   └── paginate.go
+    ├── req
+    │   └── req.go
+    ├── resp
+    │   └── response.go
+    └── validators
+        └── Equals.go
+```
+
 ### Next steps
 
 - Edit `.env` file with MySQL credentials and other configurations
