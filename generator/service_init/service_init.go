@@ -55,8 +55,8 @@ func (s *ServiceInit) Generate() error {
 		servicesIndex := strings.Index(f, "// [services]") + 13
 		f = f[:servicesIndex] + fmt.Sprintf("\n%s\n", importToInsert) + f[servicesIndex:]
 
-		publicRoutesIndex := strings.Index(f, "// [protected routes]") + 21
-		f = f[:publicRoutesIndex] + fmt.Sprintf("\n\n%s\n", serviceInitToInsert) + f[publicRoutesIndex:]
+		protectedRoutesIndex := strings.Index(f, "// [protected routes]") + 21
+		f = f[:protectedRoutesIndex] + fmt.Sprintf("\n\n%s\n", serviceInitToInsert) + f[protectedRoutesIndex:]
 
 		content, err := format.Source([]byte(f))
 		if err != nil {
