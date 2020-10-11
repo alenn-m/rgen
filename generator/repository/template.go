@@ -12,7 +12,7 @@ const R_CREATE = "Store(context.Context, *StoreReq) (int64, error)"
 const R_UPDATE = "Update(context.Context, *UpdateReq, int64) error"
 const R_DELETE = "Delete(context.Context, int64) error"
 
-const TEMPLATE = `
+const TEMPLATE_AUTH = `
 package {{Package}}
 
 import (
@@ -39,6 +39,34 @@ func NewController(db DBRepository, auth *authService.AuthService) *{{Controller
 	return &{{Controller}}{
 		db:   db,
 		auth: auth,
+	}
+}
+`
+
+const TEMPLATE_NO_AUTH = `
+package {{Package}}
+
+import (
+	"context"
+
+	"{{Root}}/models"
+)
+
+type DBRepository interface {
+    {{DBRepositoryActions}}
+}
+
+type {{Controller}} struct {
+	db DBRepository
+}
+
+type Repository interface {
+    {{RepositoryActions}}
+}
+
+func NewController(db DBRepository) *{{Controller}} {
+	return &{{Controller}}{
+		db: db,
 	}
 }
 `

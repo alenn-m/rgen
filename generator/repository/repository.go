@@ -18,6 +18,7 @@ var dir = "api"
 type Input struct {
 	Name    string
 	Actions []string
+	Public  bool
 }
 
 type Repository struct {
@@ -77,7 +78,10 @@ func (r *Repository) Generate() error {
 		}
 	}
 
-	contentString := TEMPLATE
+	contentString := TEMPLATE_AUTH
+	if r.Input.Public {
+		contentString = TEMPLATE_NO_AUTH
+	}
 	contentString = strings.Replace(contentString, "{{DBRepositoryActions}}", strings.Join(dbRepositoryActions, "\n"), -1)
 	contentString = strings.Replace(contentString, "{{RepositoryActions}}", strings.Join(repositoryActions, "\n"), -1)
 	contentString = strings.Replace(contentString, "{{Model}}", r.ParsedData.Model, -1)

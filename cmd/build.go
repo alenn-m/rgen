@@ -46,8 +46,9 @@ var buildCmd = &cobra.Command{
 				Name:           modelName,
 				Fields:         fields,
 				Relationships:  item.Relationships,
-				SkipController: item.SkipController,
 				Actions:        actionsToUpper(item.Actions),
+				SkipController: item.SkipController,
+				Public:         item.Public,
 			}
 
 			err := generate(&p, conf)

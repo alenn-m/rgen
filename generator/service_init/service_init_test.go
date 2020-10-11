@@ -22,7 +22,8 @@ func TestServiceInit_Generate(t *testing.T) {
 
 	c := ServiceInit{
 		Input: &Input{
-			Name: repoName,
+			Name:   repoName,
+			Public: false,
 		},
 		Config: &config.Config{Package: "github.com/test/testApp"},
 	}

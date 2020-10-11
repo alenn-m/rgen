@@ -72,6 +72,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		r.Init(&repository.Input{
 			Name:    p.Name,
 			Actions: p.Actions,
+			Public:  p.Public,
 		}, conf)
 		err = r.Generate()
 		if err != nil {
@@ -94,7 +95,10 @@ func generate(p *parser.Parser, conf *config.Config) error {
 
 		// Generate services
 		serviceInit := new(service_init.ServiceInit)
-		serviceInit.Init(&service_init.Input{Name: p.Name}, conf)
+		serviceInit.Init(&service_init.Input{
+			Name:   p.Name,
+			Public: p.Public,
+		}, conf)
 		err = serviceInit.Generate()
 		if err != nil {
 			return err
@@ -109,15 +113,6 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		Actions: p.Actions,
 	}, conf)
 	err = t.Generate()
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
-
-	// Generate services
-	serviceInit := new(service_init.ServiceInit)
-	serviceInit.Init(&service_init.Input{Name: p.Name}, conf)
-	err = serviceInit.Generate()
 	if err != nil {
 		log.Println(err.Error())
 		return err

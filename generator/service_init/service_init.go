@@ -14,6 +14,7 @@ import (
 type Input struct {
 	LowerCaseName string
 	Name          string
+	Public        bool
 }
 
 type ServiceInit struct {
@@ -47,16 +48,27 @@ func (s *ServiceInit) Generate() error {
 	if !strings.Contains(f, service) && !strings.Contains(f, repo) {
 		importToInsert := fmt.Sprintf("%s\n%s", service, repo)
 
+		fmt.Println("service init public: ", s.Input.Public)
+
+		authSvc := ", authSvc"
+		if s.Input.Public {
+			authSvc = ""
+		}
 		serviceInitToInsert := fmt.Sprintf(`// %s
 			%s.New(r, %s.NewController(
-				%sDB.New%sDB(db), authSvc),
-			)`, inflection.Plural(s.Input.LowerCaseName), s.Input.LowerCaseName, s.Input.LowerCaseName, s.Input.LowerCaseName, strings.Title(s.Input.Name))
+				%sDB.New%sDB(db)%s),
+			)`, inflection.Plural(s.Input.LowerCaseName), s.Input.LowerCaseName, s.Input.LowerCaseName, s.Input.LowerCaseName, strings.Title(s.Input.Name), authSvc)
 
 		servicesIndex := strings.Index(f, "// [services]") + 13
 		f = f[:servicesIndex] + fmt.Sprintf("\n%s\n", importToInsert) + f[servicesIndex:]
 
-		protectedRoutesIndex := strings.Index(f, "// [protected routes]") + 21
-		f = f[:protectedRoutesIndex] + fmt.Sprintf("\n\n%s\n", serviceInitToInsert) + f[protectedRoutesIndex:]
+		if !s.Input.Public {
+			protectedRoutesIndex := strings.Index(f, "// [protected routes]") + 21
+			f = f[:protectedRoutesIndex] + fmt.Sprintf("\n\n%s\n", serviceInitToInsert) + f[protectedRoutesIndex:]
+		} else {
+			publicRoutesIndex := strings.Index(f, "// [public routes]") + 18
+			f = f[:publicRoutesIndex] + fmt.Sprintf("\n\n%s\n", serviceInitToInsert) + f[publicRoutesIndex:]
+		}
 
 		content, err := format.Source([]byte(f))
 		if err != nil {

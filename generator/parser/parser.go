@@ -20,6 +20,7 @@ type Parser struct {
 	Actions        []string
 	Relationships  map[string]string
 	SkipController bool
+	Public         bool
 }
 
 func (p *Parser) Parse(name, fields, actions string) error {
