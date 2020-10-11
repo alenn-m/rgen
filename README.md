@@ -150,7 +150,7 @@ The default value is **false**.
 ### *Generate* command
 
 `rgen` allows you to create single service as well, this is useful when you want to update existing project.<br/><br/>
-**WARNING:** `rgen` relies on various markers and file paths to add new services, if you want to use `rgen generate` command,\
+**WARNING:** `rgen` relies on various markers and file paths to add new services, if you want to use `rgen generate` command,
 then **do not remove** markes *[services], [protected routes] and [public routes]* inside `main.go`, also **do not remove** `migrations.go` file.
 ```
 rgen generate -h
