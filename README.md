@@ -50,6 +50,8 @@ Models:
       - Required
     Actions: []
     Relationships: {}
+    OnlyModel: false
+    Public: false
 ```
 All model definitions are under `Models` namespace. 
 Each model contains:
@@ -57,7 +59,8 @@ Each model contains:
 - Validation
 - Actions
 - Relationships
-- SkipController
+- OnlyModel
+- Public
 
 #### Properties
 This is main portion of `draft.yaml`. In this section you setup all fields for you models.\
@@ -81,10 +84,13 @@ Relationships:
 Possible values are: `belongsTo, belongsToMany, hasMany`.\
 **Warning:** IDs are not created automatically. For example if *User* has many *Posts*, you have to add *UserID*\
 field to *Post* model.
-#### SkipController
-SkipController is a boolean value which indicates if you want to create a controller for specific model.\
-The default value is **true**.\
-If the SkipController is false then only a model will be created.
+#### OnlyModel
+OnlyModel is a boolean value which indicates if you want to only create a model.\
+The default value is **false**.
+#### Public
+Public is a boolean value which indicates if given resource is public or not. The term "public" means that users 
+don't have to login to access particular resource.
+The default value is **false**.
 
 ### File structure
 
@@ -159,6 +165,8 @@ Flags:
   -f, --fields string    List of fields (required) --fields='Title:string, Description:string, UserID:int64'
   -h, --help             help for generate
   -n, --name string      Resource name (required) --name='ModelName'
+      --onlyModel        Create only model (default = false)
+      --public           Public resource (default = false)
 ```
 **Example:** To create a *Comment* resource with *title, body* and *user_id* fields run the following command:
 ```
