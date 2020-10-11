@@ -48,8 +48,6 @@ func (s *ServiceInit) Generate() error {
 	if !strings.Contains(f, service) && !strings.Contains(f, repo) {
 		importToInsert := fmt.Sprintf("%s\n%s", service, repo)
 
-		fmt.Println("service init public: ", s.Input.Public)
-
 		authSvc := ", authSvc"
 		if s.Input.Public {
 			authSvc = ""

@@ -79,7 +79,7 @@ func (m *Model) parseModelName() {
 }
 
 func (m *Model) parseFields() error {
-	fields := fmt.Sprintf("ID int64 `json:\"id\" orm:\"pk\"`\n")
+	fields := fmt.Sprintf("ID int64 `json:\"id\" gorm:\"primaryKey\"`\n")
 	for _, item := range m.Input.Fields {
 		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
 	}

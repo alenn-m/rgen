@@ -43,12 +43,12 @@ var buildCmd = &cobra.Command{
 			}
 
 			p := parser.Parser{
-				Name:           modelName,
-				Fields:         fields,
-				Relationships:  item.Relationships,
-				Actions:        actionsToUpper(item.Actions),
-				SkipController: item.SkipController,
-				Public:         item.Public,
+				Name:          modelName,
+				Fields:        fields,
+				Relationships: item.Relationships,
+				Actions:       actionsToUpper(item.Actions),
+				OnlyModel:     item.OnlyModel,
+				Public:        item.Public,
 			}
 
 			err := generate(&p, conf)

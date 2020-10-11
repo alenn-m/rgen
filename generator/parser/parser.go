@@ -15,12 +15,12 @@ type Field struct {
 }
 
 type Parser struct {
-	Name           string
-	Fields         []Field
-	Actions        []string
-	Relationships  map[string]string
-	SkipController bool
-	Public         bool
+	Name          string
+	Fields        []Field
+	Actions       []string
+	Relationships map[string]string
+	OnlyModel     bool
+	Public        bool
 }
 
 func (p *Parser) Parse(name, fields, actions string) error {

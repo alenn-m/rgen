@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -11,12 +12,15 @@ import (
 	"github.com/alenn-m/rgen/generator/service_init"
 	"github.com/alenn-m/rgen/generator/transport"
 	"github.com/alenn-m/rgen/util/config"
+	helperLog "github.com/alenn-m/rgen/util/log"
 	"github.com/spf13/cobra"
 )
 
 var name string
 var fields string
 var actions string
+var public bool
+var onlyModel bool
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
@@ -38,6 +42,9 @@ var generateCmd = &cobra.Command{
 		// Initialize parser
 		p := new(parser.Parser)
 
+		p.OnlyModel = onlyModel
+		p.Public = public
+
 		err = p.Parse(name, fields, actions)
 		if err != nil {
 			log.Println(err.Error())
@@ -48,6 +55,12 @@ var generateCmd = &cobra.Command{
 		if err != nil {
 			log.Println(err.Error())
 			return
+		}
+
+		if p.OnlyModel {
+			helperLog.Info(fmt.Sprintf("Model and migrations for '%s' are created", p.Name))
+		} else {
+			helperLog.Info(fmt.Sprintf("API for '%s' is created", p.Name))
 		}
 	},
 }
@@ -66,7 +79,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		return err
 	}
 
-	if !p.SkipController {
+	if !p.OnlyModel {
 		// Generate repositories
 		r := new(repository.Repository)
 		r.Init(&repository.Input{
@@ -103,19 +116,19 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		if err != nil {
 			return err
 		}
-	}
 
-	// Generate transport layer
-	t := new(transport.Transport)
-	t.Init(&transport.Input{
-		Name:    p.Name,
-		Fields:  p.Fields,
-		Actions: p.Actions,
-	}, conf)
-	err = t.Generate()
-	if err != nil {
-		log.Println(err.Error())
-		return err
+		// Generate transport layer
+		t := new(transport.Transport)
+		t.Init(&transport.Input{
+			Name:    p.Name,
+			Fields:  p.Fields,
+			Actions: p.Actions,
+		}, conf)
+		err = t.Generate()
+		if err != nil {
+			log.Println(err.Error())
+			return err
+		}
 	}
 
 	// Initiate auto migrations
@@ -136,6 +149,8 @@ func init() {
 	generateCmd.PersistentFlags().StringVarP(&name, "name", "n", "", "Resource name (required) --name='ModelName'")
 	generateCmd.PersistentFlags().StringVarP(&fields, "fields", "f", "", "List of fields (required) --fields='Title:string, Description:string, UserID:int64'")
 	generateCmd.PersistentFlags().StringVarP(&actions, "actions", "a", "", "CRUD actions --actions='index,create,show,update,delete'")
+	generateCmd.PersistentFlags().BoolVar(&public, "public", false, "Public resource (default = false)")
+	generateCmd.PersistentFlags().BoolVar(&onlyModel, "onlyModel", false, "Create only model (default = false)")
 
 	_ = generateCmd.MarkFlagRequired("name")
 	_ = generateCmd.MarkFlagRequired("fields")
