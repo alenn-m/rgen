@@ -27,6 +27,9 @@ func (p *Parser) Parse(name, fields, actions string) error {
 	f := strings.Split(strings.TrimSpace(fields), ",")
 	for _, item := range f {
 		t := strings.Split(item, ":")
+		if len(t) < 1{
+			return fmt.Errorf("%s has incorrect format", item)
+		}
 		if len(t) > 1 {
 			key, value := t[0], t[1]
 			field := Field{
@@ -37,8 +40,6 @@ func (p *Parser) Parse(name, fields, actions string) error {
 			p.Fields = append(p.Fields, field)
 		} else if t[0] == "" {
 			return errors.New("fields are required")
-		} else {
-			return errors.New(fmt.Sprintf("%s has incorrect format", item))
 		}
 	}
 
