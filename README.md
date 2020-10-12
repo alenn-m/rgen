@@ -24,7 +24,7 @@ Run `rgen -h` to see a list of all commands:
 1. `cd` into your projects directory
 2. Run `rgen new` and answer the given questions (it will ask you which VSC you use, VSC domain and package name).
 Your answers will determine the root package and name of your project.
-3. Go into your newly create project and open `draft.yaml`. This file contains specification of your project.
+3. Go into your newly created project and open `draft.yaml`. This file contains specification of your project.
 4. Run `rgen build` to create REST endpoints.
 
 ## draft.yaml
