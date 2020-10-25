@@ -3,6 +3,8 @@ package model
 const TEMPLATE = `
 package models
 
+type {{Model}}ID int64
+
 type {{Model}} struct {
 	{{Fields}}
 
