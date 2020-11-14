@@ -21,7 +21,7 @@ func (a *AuthDB) FindByEmail(email string) (*models.User, error) {
 	return &user, err
 }
 
-func (a *AuthDB) UpdateToken(id int64, token string) error {
+func (a *AuthDB) UpdateToken(id models.UserID, token string) error {
 	err := a.client.Model(models.User{}).Where("id = ?", id).Update("api_token", token).Error
 
 	return err
@@ -35,13 +35,13 @@ func (a *AuthDB) FindByToken(token string) (*models.User, error) {
 	return &user, err
 }
 
-func (a *AuthDB) ClearToken(id int64) error {
+func (a *AuthDB) ClearToken(id models.UserID) error {
 	err := a.client.Model(models.User{}).Where("id = ?", id).Update("api_token", "").Error
 
 	return err
 }
 
-func (a *AuthDB) InsertUser(user *models.User) (int64, error) {
+func (a *AuthDB) InsertUser(user *models.User) (models.UserID, error) {
 	err := a.client.Save(user).Error
 	if err != nil {
 		return 0, err

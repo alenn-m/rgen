@@ -55,6 +55,11 @@ func TestModel_Generate(t *testing.T) {
 		t.Error(err.Error())
 	}
 
+	err = m.SetupAutoMigration()
+	if err != nil {
+		t.Error(err.Error())
+	}
+
 	if strings.TrimSpace(string(goldenFile)) != strings.TrimSpace(string(createdFile)) {
 		t.Error("Generated file is not correct")
 	}

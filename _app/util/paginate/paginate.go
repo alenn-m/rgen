@@ -9,7 +9,6 @@ import (
 )
 
 const DEFAULT_LIMIT = 30
-const MIN_PAGE = 1
 
 type PaginationReq struct {
 	Page int `json:"page"`
@@ -38,8 +37,8 @@ func Paginate(db *gorm.DB, page int, limit ...int) *gorm.DB {
 		l = limit[0]
 	}
 
-	if page < MIN_PAGE {
-		p = MIN_PAGE - 1
+	if page <= 0 {
+		return db
 	}
 
 	return db.Offset(p * l).Limit(l)

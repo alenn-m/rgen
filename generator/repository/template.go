@@ -1,13 +1,13 @@
 package repository
 
 const DBR_SHOW = "FindByID(models.{{Model}}ID) (*models.{{Model}}, error)"
-const DBR_INDEX = "ListAll(int) ([]models.{{Model}}, error)"
+const DBR_INDEX = "ListAll(int) ([]models.{{Model}}, int, error)"
 const DBR_CREATE = "Insert(*models.{{Model}}) (models.{{Model}}ID, error)"
 const DBR_UPDATE = "Update(*models.{{Model}}) error"
 const DBR_DELETE = "Delete(models.{{Model}}ID) error"
 
 const R_SHOW = "Show(context.Context, models.{{Model}}ID) (*models.{{Model}}, error)"
-const R_INDEX = "Index(context.Context, int) ([]models.{{Model}}, error)"
+const R_INDEX = "Index(context.Context, int) ([]models.{{Model}}, int, error)"
 const R_CREATE = "Store(context.Context, *StoreReq) (models.{{Model}}ID, error)"
 const R_UPDATE = "Update(context.Context, *UpdateReq, models.{{Model}}ID) error"
 const R_DELETE = "Delete(context.Context, models.{{Model}}ID) error"
@@ -96,21 +96,27 @@ const MYSQL_TEMPLATE_SHOW = `func (u *{{Model}}DB) FindByID(id models.{{Model}}I
 	return &item, err
 }`
 
-const MYSQL_TEMPLATE_INDEX = `func (u *{{Model}}DB) ListAll(page int) ([]models.{{Model}}, error) {
+const MYSQL_TEMPLATE_INDEX = `func (u *{{Model}}DB) ListAll(page int) ([]models.{{Model}}, int, error) {
 	var items []models.{{Model}}
 
     err := paginate.Paginate(u.client.New(), page).Find(&items).Error
+	if err != nil {
+		return nil, 0, err
+	}
 
-	return items, err
+    count := 0
+	err = u.client.Model(&models.{{Model}}{}).Count(&count).Error
+
+	return items, count, err
 }`
 
-const MYSQL_TEMPLATE_CREATE = `func (u *{{Model}}DB) Insert(item models.{{Model}}) (models.{{Model}}ID, error) {
+const MYSQL_TEMPLATE_CREATE = `func (u *{{Model}}DB) Insert(item *models.{{Model}}) (models.{{Model}}ID, error) {
 	err := u.client.Create(&item).Error
 
 	return item.ID, err
 }`
 
-const MYSQL_TEMPLATE_UPDATE = `func (u *{{Model}}DB) Update(item models.{{Model}}) error {
+const MYSQL_TEMPLATE_UPDATE = `func (u *{{Model}}DB) Update(item *models.{{Model}}) error {
 	return u.client.Model(&item).Updates(item).Error
 }`
 

@@ -27,10 +27,12 @@ func (m *Model) SetupAutoMigration() error {
 				return err
 			}
 
-			re := regexp.MustCompile("type([^|]*)struct")
-			match := re.FindStringSubmatch(string(data))
+			re := regexp.MustCompile("(?m)^.*?(type\\b.*?(struct)[\\s]*)")
+			match := re.FindString(string(data))
 			if len(match) > 0 {
-				modelName := strings.TrimSpace(match[1])
+				match = strings.Replace(match, "type", "", -1)
+				match = strings.Replace(match, "struct", "", -1)
+				modelName := strings.TrimSpace(match)
 				if modelName == "Base" {
 					return nil
 				}

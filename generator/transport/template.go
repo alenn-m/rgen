@@ -24,6 +24,7 @@ import (
 	"{{Root}}/util/req"
 	"{{Root}}/util/resp"
     "{{Root}}/util/paginate"
+	"{{Root}}/models"
 	"github.com/go-chi/chi"
 	// . "github.com/go-ozzo/ozzo-validation/v4"
 	// "github.com/go-ozzo/ozzo-validation/v4/is"
@@ -45,13 +46,13 @@ func New(router chi.Router, svc Repository) {
 const TRANSPORT_INDEX = `func (a *API) index(w http.ResponseWriter, r *http.Request) {
 	pReq := paginate.ParsePaginationReq(r)
 
-	result, err := a.svc.Index(r.Context(), pReq.Page)
+	result, total, err := a.svc.Index(r.Context(), pReq.Page)
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	resp.ReturnSuccess(w, result)
+    resp.ReturnPaginatedSuccess(w, pReq.Page, total, result)
 }`
 
 const TRANSPORT_CREATE = `type StoreReq struct {
@@ -87,7 +88,7 @@ const TRANSPORT_SHOW = `func (a *API) show(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	result, err := a.svc.Show(r.Context(), id)
+	result, err := a.svc.Show(r.Context(), models.{{Model}}ID(id))
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -119,7 +120,7 @@ func (a *API) update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.svc.Update(r.Context(), &updateReq, id)
+	err = a.svc.Update(r.Context(), &updateReq, models.{{Model}}ID(id))
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -135,7 +136,7 @@ const TRANSPORT_DELETE = `func (a *API) delete(w http.ResponseWriter, r *http.Re
         return
     }
 
-    err = a.svc.Delete(r.Context(), id)
+    err = a.svc.Delete(r.Context(), models.{{Model}}ID(id))
     if err != nil {
         resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
         return

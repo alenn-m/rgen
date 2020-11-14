@@ -8,13 +8,13 @@ import (
 
     "{{Root}}/models"
 )`
-const CONTROLLER_INDEX = `func (u *{{Controller}}) Index(c context.Context, page int) ([]models.{{Model}}, error) {
-    items, err := u.db.ListAll(page)
+const CONTROLLER_INDEX = `func (u *{{Controller}}) Index(c context.Context, page int) ([]models.{{Model}}, int, error) {
+    items, total, err := u.db.ListAll(page)
     if err != nil {
-        return nil, err
+        return nil, 0, err
     }
 
-    return items, nil
+    return items, total, nil
 }`
 
 const CONTROLLER_CREATE = `func (u *{{Controller}}) Store(c context.Context, r *StoreReq) (models.{{Model}}ID, error) {

@@ -13,11 +13,11 @@ type Repository interface {
 }
 
 type DBRepository interface {
-	InsertUser(*models.User) (int64, error)
+	InsertUser(*models.User) (models.UserID, error)
 	FindByEmail(string) (*models.User, error)
 	FindByToken(string) (*models.User, error)
-	UpdateToken(int64, string) error
-	ClearToken(int64) error
+	UpdateToken(models.UserID, string) error
+	ClearToken(models.UserID) error
 }
 
 type AuthController struct {

@@ -30,7 +30,7 @@ func NewAuthService(cache cache.CacheService) *AuthService {
 
 func (a AuthService) GenerateToken(user *models.User) (*jwt.Token, error) {
 	type MyClaims struct {
-		ID    int64
+		ID    models.UserID
 		Email string
 		Name  string
 		jwt.StandardClaims
