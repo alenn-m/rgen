@@ -146,7 +146,6 @@ var newCmd = &cobra.Command{
 			return err
 		})
 		if err != nil {
-			fmt.Println("sdfsfsd")
 			log.Error(err.Error())
 			return
 		}
