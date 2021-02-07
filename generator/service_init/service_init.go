@@ -23,11 +23,11 @@ type ServiceInit struct {
 }
 
 func (s *ServiceInit) Init(input *Input, conf *config.Config) {
-	s.Input = input
+	s.Input = &Input{
+		LowerCaseName: strings.ToLower(inflection.Singular(input.Name)),
+		Name:          inflection.Singular(input.Name),
+	}
 	s.Config = conf
-
-	s.Input.LowerCaseName = strings.ToLower(inflection.Singular(s.Input.Name))
-	s.Input.Name = inflection.Singular(s.Input.Name)
 }
 
 func (s *ServiceInit) Generate() error {

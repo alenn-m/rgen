@@ -24,10 +24,14 @@ type Parser struct {
 }
 
 func (p *Parser) Parse(name, fields, actions string) error {
+	p.Name = strings.TrimSpace(name)
+	p.Actions = misc.ACTIONS
+
 	f := strings.Split(strings.TrimSpace(fields), ",")
 	for _, item := range f {
 		t := strings.Split(item, ":")
-		if len(t) < 1{
+
+		if len(t) < 2 {
 			return fmt.Errorf("%s has incorrect format", item)
 		}
 		if len(t) > 1 {
@@ -44,6 +48,8 @@ func (p *Parser) Parse(name, fields, actions string) error {
 	}
 
 	if actions != "" {
+		p.Actions = []string{}
+
 		a := strings.Split(strings.TrimSpace(actions), ",")
 		for _, item := range a {
 			currentAction := strings.ToUpper(strings.TrimSpace(item))
@@ -63,11 +69,7 @@ func (p *Parser) Parse(name, fields, actions string) error {
 
 			p.Actions = append(p.Actions, currentAction)
 		}
-	} else {
-		p.Actions = misc.ACTIONS
 	}
-
-	p.Name = strings.TrimSpace(name)
 
 	return nil
 }

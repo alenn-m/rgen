@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-	"go/format"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/alenn-m/rgen/util/files"
+	"github.com/alenn-m/rgen/util/templates"
 )
 
 func (m *Model) SetupAutoMigration() error {
@@ -18,9 +18,46 @@ func (m *Model) SetupAutoMigration() error {
 		return err
 	}
 
+	err = m.parseModels(location)
+	if err != nil {
+		return err
+	}
+
+	// in case someone removed this file, let's create it again
+	if !files.FileExists("migrations.go") {
+		err = ioutil.WriteFile("migrations.go", []byte(""), 0644)
+		if err != nil {
+			return err
+		}
+	}
+
+	migrationsLocation, err := filepath.Abs("./")
+	if err != nil {
+		return err
+	}
+
+	output, err := ioutil.ReadFile(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/generator/model/migrations_template.tmpl", os.Getenv("GOPATH")))
+	if err != nil {
+		return err
+	}
+
+	content, err := templates.ParseTemplate(string(output), m.ParsedMigrationData, nil)
+	if err != nil {
+		return err
+	}
+
+	err = m.createFile(migrationsLocation, content, "migrations.go")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *Model) parseModels(location string) error {
 	models := []string{}
 
-	err = filepath.Walk(location, func(path string, f os.FileInfo, err error) error {
+	err := filepath.Walk(location, func(path string, f os.FileInfo, err error) error {
 		if !f.IsDir() {
 			data, err := ioutil.ReadFile(path)
 			if err != nil {
@@ -45,32 +82,10 @@ func (m *Model) SetupAutoMigration() error {
 		return nil
 	})
 
-	// in case someone removed this file, let's create it again
-	if !files.FileExists("migrations.go") {
-		err = ioutil.WriteFile("migrations.go", []byte(""), 0644)
-		if err != nil {
-			return err
-		}
+	m.ParsedMigrationData = parsedMigrationData{
+		Models: strings.Join(models, ", "),
+		Root:   m.Config.Package,
 	}
 
-	migrationsLocation, err := filepath.Abs("migrations.go")
-	if err != nil {
-		return err
-	}
-
-	contentString := MIGRATIONS_TEMPLATE
-	contentString = strings.Replace(contentString, "{{Root}}", m.Config.Package, -1)
-	contentString = strings.Replace(contentString, "{{Models}}", strings.Join(models, ", "), -1)
-
-	content, err := format.Source([]byte(contentString))
-	if err != nil {
-		return err
-	}
-
-	err = m.saveFile(content, migrationsLocation)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

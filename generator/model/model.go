@@ -3,14 +3,16 @@ package model
 import (
 	"errors"
 	"fmt"
-	"go/format"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/config"
+	"github.com/alenn-m/rgen/util/files"
+	"github.com/alenn-m/rgen/util/templates"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 )
@@ -31,11 +33,17 @@ type Model struct {
 	Input  *Input
 	Config *config.Config
 
-	ParsedData parsedData
+	ParsedModelData     parsedModelData
+	ParsedMigrationData parsedMigrationData
 }
 
-type parsedData struct {
-	Name   string
+type parsedMigrationData struct {
+	Models string
+	Root   string
+}
+
+type parsedModelData struct {
+	Model  string
 	Fields string
 }
 
@@ -45,28 +53,27 @@ func (m *Model) Init(input *Input, conf *config.Config) {
 }
 
 func (m *Model) Generate() error {
-	m.parseModelName()
-	err := m.parseFields()
+	err := m.parseData()
 	if err != nil {
 		return err
 	}
 
-	contentString := TEMPLATE
-	contentString = strings.Replace(contentString, "{{Model}}", m.ParsedData.Name, -1)
-	contentString = strings.Replace(contentString, "{{Fields}}", m.ParsedData.Fields, -1)
-	contentString = strings.Replace(contentString, "{{Root}}", m.Config.Package, -1)
-
-	location, err := filepath.Abs(dir)
+	p, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
 
-	content, err := format.Source([]byte(contentString))
+	output, err := ioutil.ReadFile(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/generator/model/template.tmpl", os.Getenv("GOPATH")))
 	if err != nil {
 		return err
 	}
 
-	err = m.saveFile(content, fmt.Sprintf("%s/%s.go", location, m.Input.Name))
+	content, err := templates.ParseTemplate(string(output), m.ParsedModelData, nil)
+	if err != nil {
+		return err
+	}
+
+	err = m.createFile(p, content, "model.go")
 	if err != nil {
 		return err
 	}
@@ -74,12 +81,8 @@ func (m *Model) Generate() error {
 	return nil
 }
 
-func (m *Model) parseModelName() {
-	m.ParsedData.Name = inflection.Singular(strings.Title(m.Input.Name))
-}
-
-func (m *Model) parseFields() error {
-	fields := fmt.Sprintf("ID %sID `json:\"id\" gorm:\"primaryKey\"`\n", m.ParsedData.Name)
+func (m *Model) parseData() error {
+	fields := fmt.Sprintf("ID %sID `json:\"id\" gorm:\"primaryKey\"`\n", m.Input.Name)
 	for _, item := range m.Input.Fields {
 		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
 	}
@@ -103,13 +106,26 @@ func (m *Model) parseFields() error {
 		}
 	}
 
-	m.ParsedData.Fields = fields
+	m.ParsedModelData = parsedModelData{
+		Model:  inflection.Singular(strings.Title(m.Input.Name)),
+		Fields: fields,
+	}
 
 	return nil
 }
 
-func (m *Model) saveFile(content []byte, location string) error {
-	err := ioutil.WriteFile(location, content, 0644)
+func (m *Model) createFile(location, content, filename string) error {
+	servicePath := fmt.Sprintf("%s/%s", location, strings.ToLower(m.Input.Name))
 
-	return err
+	err := files.MakeDirIfNotExist(servicePath)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s", location, filename), []byte(content), 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

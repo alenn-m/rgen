@@ -37,8 +37,8 @@ func TestModel_Generate(t *testing.T) {
 				"Post": "manyToMany",
 			},
 		},
-		Config:     &config.Config{Package: "github.com/test/testApp"},
-		ParsedData: parsedData{},
+		Config:          &config.Config{Package: "github.com/test/testApp"},
+		ParsedModelData: parsedModelData{},
 	}
 	err = m.Generate()
 	if err != nil {

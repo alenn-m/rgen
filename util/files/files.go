@@ -1,11 +1,11 @@
 package files
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"errors"
 )
 
 func CopyFile(src, dst string) (err error) {
@@ -108,4 +108,15 @@ func FileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
+}
+
+func MakeDirIfNotExist(location string) error {
+	if _, err := os.Stat(location); os.IsNotExist(err) {
+		err = os.MkdirAll(location, os.ModePerm)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
