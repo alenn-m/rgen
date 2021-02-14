@@ -1,6 +1,7 @@
 package model
 
 import (
+	_ "embed"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -11,6 +12,9 @@ import (
 	"github.com/alenn-m/rgen/util/files"
 	"github.com/alenn-m/rgen/util/templates"
 )
+
+//go:embed "migrations_template.tmpl"
+var MIGRATIONS_TEMPLATE string
 
 func (m *Model) SetupAutoMigration() error {
 	location, err := filepath.Abs(dir)
@@ -36,17 +40,12 @@ func (m *Model) SetupAutoMigration() error {
 		return err
 	}
 
-	output, err := ioutil.ReadFile(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/generator/model/migrations_template.tmpl", os.Getenv("GOPATH")))
+	content, err := templates.ParseTemplate(MIGRATIONS_TEMPLATE, m.ParsedMigrationData, nil)
 	if err != nil {
 		return err
 	}
 
-	content, err := templates.ParseTemplate(string(output), m.ParsedMigrationData, nil)
-	if err != nil {
-		return err
-	}
-
-	err = m.createFile(migrationsLocation, content, "migrations.go")
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s", migrationsLocation, "migrations.go"), []byte(content), 0644)
 	if err != nil {
 		return err
 	}

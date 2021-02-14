@@ -7,6 +7,7 @@ import (
 
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/log"
+	"github.com/alenn-m/rgen/util/misc"
 	"github.com/spf13/cobra"
 )
 
@@ -40,6 +41,10 @@ var buildCmd = &cobra.Command{
 					Key:   k,
 					Value: v,
 				})
+			}
+
+			if len(item.Actions) == 0 {
+				item.Actions = misc.ACTIONS
 			}
 
 			p := parser.Parser{

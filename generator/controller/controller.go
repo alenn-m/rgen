@@ -1,6 +1,7 @@
 package controller
 
 import (
+	_ "embed"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -14,6 +15,9 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 )
+
+//go:embed "template.tmpl"
+var template string
 
 var dir = "api"
 
@@ -75,12 +79,7 @@ func (c *Controller) parseData() {
 }
 
 func (c *Controller) createFile(location string) error {
-	output, err := ioutil.ReadFile(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/generator/controller/template.tmpl", os.Getenv("GOPATH")))
-	if err != nil {
-		return err
-	}
-
-	content, err := templates.ParseTemplate(string(output), c.ParsedData, map[string]interface{}{
+	content, err := templates.ParseTemplate(template, c.ParsedData, map[string]interface{}{
 		"ActionUsed": func(input string) bool {
 			for _, item := range c.Input.Actions {
 				if item == input {

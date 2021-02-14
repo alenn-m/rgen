@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/misc"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +24,7 @@ func TestTransport_Generate(t *testing.T) {
 	c := Transport{
 		Input: &Input{
 			Name:    repoName,
-			Actions: []string{misc.ACTION_CREATE, misc.ACTION_UPDATE},
+			Actions: []string{},
 		},
 		Config:     &config.Config{Package: "github.com/test/testApp"},
 		ParsedData: parsedData{},

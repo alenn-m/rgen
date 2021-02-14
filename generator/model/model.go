@@ -1,21 +1,23 @@
 package model
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/files"
 	"github.com/alenn-m/rgen/util/templates"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 )
+
+//go:embed "template.tmpl"
+var TEMPLATE string
 
 const BelongsTo = "belongsTo"
 const HasMany = "hasMany"
@@ -63,17 +65,12 @@ func (m *Model) Generate() error {
 		return err
 	}
 
-	output, err := ioutil.ReadFile(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/generator/model/template.tmpl", os.Getenv("GOPATH")))
+	content, err := templates.ParseTemplate(TEMPLATE, m.ParsedModelData, nil)
 	if err != nil {
 		return err
 	}
 
-	content, err := templates.ParseTemplate(string(output), m.ParsedModelData, nil)
-	if err != nil {
-		return err
-	}
-
-	err = m.createFile(p, content, "model.go")
+	err = m.createFile(p, content)
 	if err != nil {
 		return err
 	}
@@ -114,15 +111,9 @@ func (m *Model) parseData() error {
 	return nil
 }
 
-func (m *Model) createFile(location, content, filename string) error {
-	servicePath := fmt.Sprintf("%s/%s", location, strings.ToLower(m.Input.Name))
-
-	err := files.MakeDirIfNotExist(servicePath)
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(fmt.Sprintf("%s/%s", location, filename), []byte(content), 0644)
+func (m *Model) createFile(location, content string) error {
+	filename := strings.Title(strings.ToLower(m.Input.Name))
+	err := ioutil.WriteFile(fmt.Sprintf("%s/%s.go", location, filename), []byte(content), 0644)
 	if err != nil {
 		return err
 	}

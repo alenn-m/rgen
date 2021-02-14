@@ -1,9 +1,9 @@
 package transport
 
 import (
+	_ "embed"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -14,6 +14,9 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 )
+
+//go:embed "template.tmpl"
+var TEMPLATE string
 
 var dir = "api"
 
@@ -46,12 +49,7 @@ func (t *Transport) Init(input *Input, conf *config.Config) {
 func (t *Transport) Generate() error {
 	t.parseData()
 
-	output, err := ioutil.ReadFile(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/generator/transport/template.tmpl", os.Getenv("GOPATH")))
-	if err != nil {
-		return err
-	}
-
-	content, err := templates.ParseTemplate(string(output), t.ParsedData, map[string]interface{}{
+	content, err := templates.ParseTemplate(TEMPLATE, t.ParsedData, map[string]interface{}{
 		"ActionUsed": func(input string) bool {
 			for _, item := range t.Input.Actions {
 				if item == input {
@@ -102,7 +100,7 @@ func (t *Transport) createFile(location, content string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(fmt.Sprintf("%s/transport.go", location), []byte(content), 0644)
+	err = ioutil.WriteFile(fmt.Sprintf("%s/transport.go", servicePath), []byte(content), 0644)
 	if err != nil {
 		return err
 	}

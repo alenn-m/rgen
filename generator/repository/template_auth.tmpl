@@ -1,0 +1,36 @@
+package {{.Package}}
+
+import (
+    "context"
+
+    "{{.Root}}/models"
+    authService "{{.Root}}/util/auth"
+)
+
+type DBRepository interface {
+    {{ if ActionUsed "INDEX" }} ListAll(int) ([]models.{{.Model}}, int, error) {{ end }}
+    {{ if ActionUsed "SHOW" }} FindByID(models.{{.Model}}ID) (*models.{{.Model}}, error) {{ end }}
+    {{ if ActionUsed "CREATE" }} Insert(*models.{{.Model}}) (models.{{.Model}}ID, error) {{ end }}
+    {{ if ActionUsed "UPDATE" }} Update(*models.{{.Model}}) error {{ end }}
+    {{ if ActionUsed "DELETE" }} Delete(models.{{.Model}}ID) error {{ end }}
+}
+
+type {{.Controller}} struct {
+    db   DBRepository
+    auth *authService.AuthService
+}
+
+type Repository interface {
+    {{ if ActionUsed "INDEX" }} Index(context.Context, int) ([]models.{{.Model}}, int, error) {{ end }}
+    {{ if ActionUsed "SHOW" }} Show(context.Context, models.{{.Model}}ID) (*models.{{.Model}}, error) {{ end }}
+    {{ if ActionUsed "CREATE" }} Store(context.Context, *StoreReq) (models.{{.Model}}ID, error) {{ end }}
+    {{ if ActionUsed "UPDATE" }} Update(context.Context, *UpdateReq, models.{{.Model}}ID) error {{ end }}
+    {{ if ActionUsed "DELETE" }} Delete(context.Context, models.{{.Model}}ID) error {{ end }}
+}
+
+func NewController(db DBRepository, auth *authService.AuthService) *{{.Controller}} {
+    return &{{.Controller}}{
+        db:   db,
+        auth: auth,
+    }
+}
