@@ -79,9 +79,11 @@ func (m *Model) Generate() error {
 }
 
 func (m *Model) parseData() error {
-	fields := fmt.Sprintf("ID %sID `json:\"id\" gorm:\"primaryKey\"`\n", m.Input.Name)
+	fields := fmt.Sprintf("ID %sID `json:\"id\" db:\"%s\"`\n", m.Input.Name, strcase.ToCamel(m.Input.Name))
 	for _, item := range m.Input.Fields {
-		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
+		camelName := strcase.ToCamel(item.Key)
+		snakeName := strcase.ToSnake(item.Key)
+		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", camelName, item.Value, snakeName)
 	}
 
 	for key, relationship := range m.Input.Relationships {
@@ -97,7 +99,7 @@ func (m *Model) parseData() error {
 			sort.Strings(tables)
 			// create the joining table name
 			r := inflection.Plural(fmt.Sprintf("%s_%s", tables[0], tables[1]))
-			fields += fmt.Sprintf("%s []%s `json:\"%s\" gorm:\"many2many:%s\"`\n", inflection.Plural(key), key, strcase.ToSnake(inflection.Plural(key)), r)
+			fields += fmt.Sprintf("%s []%s `json:\"%s\"`\n", inflection.Plural(key), key, r)
 		default:
 			return errors.New("invalid relationship")
 		}
