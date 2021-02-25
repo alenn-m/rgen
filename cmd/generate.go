@@ -132,13 +132,13 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	}
 
 	// Initiate auto migrations
-	if conf.AutoMigrations {
-		err = m.SetupAutoMigration()
-		if err != nil {
-			log.Println(err.Error())
-			return err
-		}
-	}
+	// if conf.AutoMigrations {
+	// 	err = m.SetupAutoMigration()
+	// 	if err != nil {
+	// 		log.Println(err.Error())
+	// 		return err
+	// 	}
+	// }
 
 	return nil
 }
