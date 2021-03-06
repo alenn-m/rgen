@@ -102,18 +102,13 @@ func NewTable(name string, opts map[string]interface{}) Table {
 	if opts == nil {
 		opts = make(map[string]interface{})
 	}
-	// auto-timestamp as default
-	if enabled, exists := opts["timestamps"]; !exists || enabled == true {
-		opts["timestamps"] = true
-	}
-	useTimestampMacro, _ := opts["timestamps"].(bool)
+
 	return Table{
-		Name:              name,
-		Columns:           []fizz.Column{},
-		Indexes:           []fizz.Index{},
-		Options:           opts,
-		columnsCache:      map[string]struct{}{},
-		useTimestampMacro: useTimestampMacro,
+		Name:         name,
+		Columns:      []fizz.Column{},
+		Indexes:      []fizz.Index{},
+		Options:      opts,
+		columnsCache: map[string]struct{}{},
 	}
 }
 
@@ -161,4 +156,30 @@ func (t Table) UnFizz() string {
 // Timestamp is a shortcut to add a timestamp column with default options.
 func (t *Table) Timestamp(name string) error {
 	return t.Column(name, "timestamp", fizz.Options{})
+}
+
+// ForeignKey adds a new foreign key to the table definition.
+func (t *Table) ForeignKey(column string, refs interface{}, options fizz.Options) error {
+	fkr, err := parseForeignKeyRef(refs)
+	if err != nil {
+		return err
+	}
+	fk := fizz.ForeignKey{
+		Column:     column,
+		References: fkr,
+		Options:    options,
+	}
+
+	if options["name"] != nil {
+		var ok bool
+		fk.Name, ok = options["name"].(string)
+		if !ok {
+			return fmt.Errorf(`expected options field "name" to be of type "string" but got "%T"`, options["name"])
+		}
+	} else {
+		fk.Name = fmt.Sprintf("%s_%s_%s_fk", t.Name, fk.References.Table, strings.Join(fk.References.Columns, "_"))
+	}
+
+	t.ForeignKeys = append(t.ForeignKeys, fk)
+	return nil
 }

@@ -1,14 +1,19 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
+	"github.com/alenn-m/rgen/util/draft"
+	"github.com/alenn-m/rgen/util/files"
 	"github.com/alenn-m/rgen/util/log"
 	"github.com/alenn-m/rgen/util/misc"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 // buildCmd represents the new command
@@ -33,6 +38,8 @@ var buildCmd = &cobra.Command{
 			log.Error(err.Error())
 			return
 		}
+
+		fmt.Println("Models: ", drft.Models)
 
 		for modelName, item := range drft.Models {
 			fields := []parser.Field{}
@@ -74,6 +81,25 @@ func actionsToUpper(input []string) []string {
 	}
 
 	return output
+}
+
+func loadDraft(wd string) (*draft.Draft, error) {
+	if !files.FileExists(fmt.Sprintf("%s/draft.yaml", wd)) {
+		return nil, errors.New("draft.yaml not found")
+	}
+
+	draftData, err := ioutil.ReadFile(fmt.Sprintf("%s/draft.yaml", wd))
+	if err != nil {
+		return nil, err
+	}
+
+	var drft draft.Draft
+	err = yaml.Unmarshal(draftData, &drft)
+	if err != nil {
+		return nil, err
+	}
+
+	return &drft, nil
 }
 
 func init() {

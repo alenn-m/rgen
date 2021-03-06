@@ -9,6 +9,8 @@ import (
 	"github.com/alenn-m/rgen/util/misc"
 )
 
+type Relationships map[string]string
+
 type Field struct {
 	Key   string
 	Value string
@@ -18,7 +20,7 @@ type Parser struct {
 	Name          string
 	Fields        []Field
 	Actions       []string
-	Relationships map[string]string
+	Relationships Relationships
 	OnlyModel     bool
 	Public        bool
 }

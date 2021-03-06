@@ -45,15 +45,6 @@ func main() {
 
 	db = db.LogMode(true)
 
-	autoMigrate, err := strconv.ParseBool(os.Getenv("AUTO_MIGRATE"))
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	if autoMigrate {
-		RunMigrations(db)
-	}
-
 	// memory cache can be replaced with any other type of cache
 	c := cache.New(time.Minute*60*24, 10*time.Minute)
 	caching := memory.NewMemoryCache(c)

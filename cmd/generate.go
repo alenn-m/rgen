@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/alenn-m/rgen/generator/controller"
+	"github.com/alenn-m/rgen/generator/migration"
 	"github.com/alenn-m/rgen/generator/model"
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/generator/repository"
@@ -129,16 +130,20 @@ func generate(p *parser.Parser, conf *config.Config) error {
 			log.Println(err.Error())
 			return err
 		}
-	}
 
-	// Initiate auto migrations
-	// if conf.AutoMigrations {
-	// 	err = m.SetupAutoMigration()
-	// 	if err != nil {
-	// 		log.Println(err.Error())
-	// 		return err
-	// 	}
-	// }
+		// Generate migrations
+		mg := new(migration.Migration)
+		mg.Init(&migration.Input{
+			Name:          p.Name,
+			Fields:        p.Fields,
+			Relationships: p.Relationships,
+		}, conf)
+		err = mg.Generate()
+		if err != nil {
+			log.Println(err.Error())
+			return err
+		}
+	}
 
 	return nil
 }

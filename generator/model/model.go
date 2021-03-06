@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
@@ -83,7 +82,13 @@ func (m *Model) parseData() error {
 	for _, item := range m.Input.Fields {
 		camelName := strcase.ToCamel(item.Key)
 		snakeName := strcase.ToSnake(item.Key)
-		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", camelName, item.Value, snakeName)
+
+		itemType := item.Value
+		if strings.ToLower(item.Value) == "id" {
+			itemType = fmt.Sprintf("%sID", camelName)
+		}
+
+		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", camelName, itemType, snakeName)
 	}
 
 	for key, relationship := range m.Input.Relationships {
@@ -93,13 +98,7 @@ func (m *Model) parseData() error {
 		case HasMany:
 			fields += fmt.Sprintf("%s []%s `json:\"%s\"`\n", inflection.Plural(key), key, strcase.ToSnake(inflection.Plural(key)))
 		case ManyToMany:
-			// create slice of joining tables
-			tables := []string{strings.ToLower(m.Input.Name), strings.ToLower(key)}
-			// sort them
-			sort.Strings(tables)
-			// create the joining table name
-			r := inflection.Plural(fmt.Sprintf("%s_%s", tables[0], tables[1]))
-			fields += fmt.Sprintf("%s []%s `json:\"%s\"`\n", inflection.Plural(key), key, r)
+			fields += fmt.Sprintf("%s []%s `json:\"%s\"`\n", inflection.Plural(key), key, strcase.ToSnake(key))
 		default:
 			return errors.New("invalid relationship")
 		}

@@ -7,10 +7,9 @@ import (
 	"os"
 
 	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/draft"
 	"github.com/alenn-m/rgen/util/files"
-	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -45,23 +44,4 @@ func loadConfig(wd string) (*config.Config, error) {
 	}
 
 	return &conf, nil
-}
-
-func loadDraft(wd string) (*draft.Draft, error) {
-	if !files.FileExists(fmt.Sprintf("%s/draft.yaml", wd)) {
-		return nil, errors.New("draft.yaml not found")
-	}
-
-	draftData, err := ioutil.ReadFile(fmt.Sprintf("%s/draft.yaml", wd))
-	if err != nil {
-		return nil, err
-	}
-
-	var drft draft.Draft
-	err = yaml.Unmarshal(draftData, &drft)
-	if err != nil {
-		return nil, err
-	}
-
-	return &drft, nil
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"github.com/pressly/goose"
 	"github.com/spf13/cobra"
@@ -35,8 +36,6 @@ var migrateCmd = &cobra.Command{
 			return
 		}
 
-		command := args[1]
-
 		db, err := goose.OpenDBWithDriver("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 			os.Getenv("DB_USERNAME"),
 			os.Getenv("DB_PASSWORD"),
@@ -54,11 +53,13 @@ var migrateCmd = &cobra.Command{
 			}
 		}()
 
+		command := args[0]
 		arguments := []string{}
 		if len(args) > 3 {
 			arguments = append(arguments, args[3:]...)
 		}
 
+		goose.SetSequential(true)
 		if err := goose.Run(command, db, dir, arguments...); err != nil {
 			log.Fatalf("goose %v: %v", command, err)
 		}

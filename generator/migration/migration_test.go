@@ -15,6 +15,9 @@ func TestMigration_Generate(t *testing.T) {
 				{Key: "Body", Value: "string"},
 				{Key: "UserID", Value: "int64"},
 			},
+			Relationships: map[string]string{
+				"User": "belongsTo",
+			},
 		},
 		Config: nil,
 	}
