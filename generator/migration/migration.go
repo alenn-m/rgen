@@ -2,7 +2,6 @@ package migration
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 	"text/template"
 
@@ -94,11 +93,8 @@ func (m *Migration) CreateMigration(opts *ctable.Options) error {
 		return err
 	}
 
-	m2mTables := []Table{}
-
 	for modelItem, relationhip := range m.Input.Relationships {
-		switch relationhip {
-		case model.BelongsTo:
+		if relationhip == model.BelongsTo {
 			fk := fmt.Sprintf("%sID", modelItem)
 			err = t.ForeignKey(fk, map[string]interface{}{
 				inflection.Plural(modelItem): []interface{}{fk},
@@ -106,46 +102,12 @@ func (m *Migration) CreateMigration(opts *ctable.Options) error {
 			if err != nil {
 				return err
 			}
-		case model.ManyToMany:
-			// create slice of joining tables
-			tables := []string{m.Input.Name, modelItem}
-			// sort them
-			sort.Strings(tables)
-			// create the joining table name
-			r := inflection.Plural(fmt.Sprintf("%s%s", tables[0], tables[1]))
-
-			m2m := NewTable(r, map[string]interface{}{
-				"timestamps": false,
-			})
-
-			fk1 := fmt.Sprintf("%sID", tables[0])
-			fk2 := fmt.Sprintf("%sID", tables[1])
-
-			m2m.Column(fk1, "integer", fizz.Options{"primary": true})
-			m2m.ForeignKey(fk1, map[string]interface{}{
-				inflection.Plural(tables[0]): []interface{}{fk1},
-			}, nil)
-			m2m.Column(fk2, "integer", fizz.Options{"primary": true})
-			m2m.ForeignKey(fk2, map[string]interface{}{
-				inflection.Plural(tables[1]): []interface{}{fk2},
-			}, nil)
-
-			m2mTables = append(m2mTables, m2m)
-		default:
-			return fmt.Errorf("invalid relationship: %s", relationhip)
 		}
 	}
 
 	err = m.generateGooseMigration(opts, t)
 	if err != nil {
 		return err
-	}
-
-	for _, m2m := range m2mTables {
-		err = m.generateGooseMigration(opts, m2m)
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil

@@ -183,3 +183,28 @@ func (t *Table) ForeignKey(column string, refs interface{}, options fizz.Options
 	t.ForeignKeys = append(t.ForeignKeys, fk)
 	return nil
 }
+
+// PrimaryKey adds a primary key to the table. It's useful to define a composite
+// primary key.
+func (t *Table) PrimaryKey(pk ...string) error {
+	if len(pk) == 0 {
+		return errors.New("missing columns for primary key")
+	}
+	if t.primaryKeys != nil {
+		return errors.New("duplicate primary key")
+	}
+	if !t.HasColumns(pk...) {
+		return errors.New("columns must be declared before the primary key")
+	}
+	if len(pk) == 1 {
+		for i, c := range t.Columns {
+			if c.Name == pk[0] {
+				t.Columns[i].Primary = true
+				break
+			}
+		}
+	}
+	t.primaryKeys = make([]string, 0)
+	t.primaryKeys = append(t.primaryKeys, pk...)
+	return nil
+}

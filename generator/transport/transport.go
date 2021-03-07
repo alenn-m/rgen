@@ -79,7 +79,7 @@ func (t *Transport) Generate() error {
 
 func (t *Transport) parseData() *Transport {
 	t.ParsedData = parsedData{
-		Prefix:  strings.ToLower(inflection.Singular(t.Input.Name)),
+		Prefix:  strings.ToLower(inflection.Plural(t.Input.Name)),
 		Package: strings.ToLower(inflection.Singular(t.Input.Name)),
 		Root:    t.Config.Package,
 		Model:   strings.Title(inflection.Singular(t.Input.Name)),

@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/alenn-m/rgen/generator/migration"
+	"github.com/alenn-m/rgen/generator/model"
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/draft"
 	"github.com/alenn-m/rgen/util/files"
@@ -39,7 +41,7 @@ var buildCmd = &cobra.Command{
 			return
 		}
 
-		fmt.Println("Models: ", drft.Models)
+		tables := []migration.PivotMigrationEntry{}
 
 		for modelName, item := range drft.Models {
 			fields := []parser.Field{}
@@ -68,6 +70,26 @@ var buildCmd = &cobra.Command{
 				log.Error(err.Error())
 				return
 			}
+
+			for mn, relationship := range item.Relationships {
+				if relationship == model.ManyToMany {
+					tables = append(tables, migration.PivotMigrationEntry{
+						TableOne: modelName,
+						TableTwo: mn,
+					})
+				}
+			}
+
+		}
+
+		// Generating pivot tables at the end to avoid duplicates
+		// and to be sure referenced tables exists
+		pm := new(migration.PivotMigration)
+		pm.Init(tables)
+		err = pm.Generate()
+		if err != nil {
+			log.Error(err.Error())
+			return
 		}
 
 		log.Info(fmt.Sprintf("Built API for %d model(s)", len(drft.Models)))

@@ -6,7 +6,6 @@ import (
     "net/http"
     "os"
     "time"
-	"strconv"
 
     // [services]
     "{{Root}}/api/auth"

@@ -83,12 +83,7 @@ func (m *Model) parseData() error {
 		camelName := strcase.ToCamel(item.Key)
 		snakeName := strcase.ToSnake(item.Key)
 
-		itemType := item.Value
-		if strings.ToLower(item.Value) == "id" {
-			itemType = fmt.Sprintf("%sID", camelName)
-		}
-
-		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", camelName, itemType, snakeName)
+		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", camelName, item.Value, snakeName)
 	}
 
 	for key, relationship := range m.Input.Relationships {
