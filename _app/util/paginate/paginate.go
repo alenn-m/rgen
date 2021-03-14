@@ -1,11 +1,10 @@
 package paginate
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/jinzhu/gorm"
 )
 
 const DEFAULT_LIMIT = 30
@@ -29,7 +28,7 @@ func ParsePaginationReq(r *http.Request) *PaginationReq {
 	return &pReq
 }
 
-func Paginate(db *gorm.DB, page int, limit ...int) *gorm.DB {
+func Paginate(query string, page int, limit ...int) string {
 	l := DEFAULT_LIMIT
 	p := page - 1
 
@@ -38,18 +37,8 @@ func Paginate(db *gorm.DB, page int, limit ...int) *gorm.DB {
 	}
 
 	if page <= 0 {
-		return db
+		return query
 	}
 
-	return db.Offset(p * l).Limit(l)
-}
-
-func FilterPaginate(db *gorm.DB, page int, filter map[string]string) *gorm.DB {
-	db = Paginate(db, page)
-
-	for k, v := range filter {
-		db.Where(k+"= ?", v)
-	}
-
-	return db
+	return fmt.Sprintf("%s LIMIT %d, %d", query, p*l, l)
 }

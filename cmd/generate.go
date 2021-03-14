@@ -85,6 +85,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		r := new(repository.Repository)
 		r.Init(&repository.Input{
 			Name:    p.Name,
+			Fields:  p.Fields,
 			Actions: p.Actions,
 			Public:  p.Public,
 		}, conf)

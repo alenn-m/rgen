@@ -1,37 +1,45 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "net/http"
-    "os"
-    "time"
+	"flag"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"time"
 
-    // [services]
-    "{{Root}}/api/auth"
-    authDB "{{Root}}/api/auth/repositories/mysql"
-    "{{Root}}/api/user"
-    userDB "{{Root}}/api/user/repositories/mysql"
-
-    mdw "{{Root}}/middleware"
-    authService "{{Root}}/util/auth"
-    "{{Root}}/util/cache/memory"
-    "github.com/go-chi/chi"
-    "github.com/go-chi/chi/middleware"
-    "github.com/go-chi/jwtauth"
-    "github.com/jinzhu/gorm"
-    _ "github.com/jinzhu/gorm/dialects/mysql"
-    "github.com/joho/godotenv"
+	// [services]
+	"{{Root}}/api/auth"
+	authDB "{{Root}}/api/auth/repositories/mysql"
+	"{{Root}}/api/user"
+	userDB "{{Root}}/api/user/repositories/mysql"
+	"{{Root}}/database/seeds"
+	"github.com/jmoiron/sqlx"
 	"github.com/patrickmn/go-cache"
+
+	mdw "{{Root}}/middleware"
+	authService "{{Root}}/util/auth"
+	"{{Root}}/util/cache/memory"
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/jwtauth"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/joho/godotenv"
 )
 
+var seed bool
+
 func main() {
+	flag.BoolVar(&seed, "seed", false, "Seed the database")
+
+	flag.Parse()
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	db, err := gorm.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	db, err := sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		os.Getenv("DB_USERNAME"),
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_HOST"),
@@ -42,7 +50,23 @@ func main() {
 		panic(err)
 	}
 
-	db = db.LogMode(true)
+	db.MapperFunc(func(s string) string {
+		return s
+	})
+
+	if seed {
+		fmt.Println("Seeding database")
+
+		s := seeds.NewDatabaseSeeder(db)
+		err = s.Run()
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("Done seeding database")
+
+		return
+	}
 
 	// memory cache can be replaced with any other type of cache
 	c := cache.New(time.Minute*60*24, 10*time.Minute)

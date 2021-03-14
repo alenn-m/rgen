@@ -1,28 +1,31 @@
 package mysql
 
 import (
-	"{{Root}}/models"
-	"github.com/jinzhu/gorm"
+	"github.com/aa/aa/models"
+	"github.com/jmoiron/sqlx"
 )
 
 type AuthDB struct {
-	client *gorm.DB
+	client *sqlx.DB
 }
 
-func NewAuthDB(client *gorm.DB) *AuthDB {
+func NewAuthDB(client *sqlx.DB) *AuthDB {
 	return &AuthDB{client: client}
 }
 
 func (a *AuthDB) FindByEmail(email string) (*models.User, error) {
 	var user models.User
 
-	err := a.client.Where("email = ?", email).Find(&user).Error
+	err := a.client.Get(&user, "SELECT * FROM Users WHERE Email = ?", email)
+	if err != nil {
+		return nil, err
+	}
 
-	return &user, err
+	return &user, nil
 }
 
 func (a *AuthDB) UpdateToken(id models.UserID, token string) error {
-	err := a.client.Model(models.User{}).Where("id = ?", id).Update("api_token", token).Error
+	_, err := a.client.Exec("UPDATE Users SET ApiToken = ? WHERE UserID = ?", token, id)
 
 	return err
 }
@@ -30,22 +33,30 @@ func (a *AuthDB) UpdateToken(id models.UserID, token string) error {
 func (a *AuthDB) FindByToken(token string) (*models.User, error) {
 	var user models.User
 
-	err := a.client.Where("api_token = ?", token).Find(&user).Error
+	err := a.client.Get(&user, "SELECT * FROM Users WHERE ApiToken = ?", token)
+	if err != nil {
+		return nil, err
+	}
 
-	return &user, err
+	return &user, nil
 }
 
 func (a *AuthDB) ClearToken(id models.UserID) error {
-	err := a.client.Model(models.User{}).Where("id = ?", id).Update("api_token", "").Error
+	_, err := a.client.Exec("UPDATE Users SET ApiToken = '' WHERE UserID = ?", id)
 
 	return err
 }
 
 func (a *AuthDB) InsertUser(user *models.User) (models.UserID, error) {
-	err := a.client.Save(user).Error
+	r, err := a.client.NamedExec("INSERT INTO Users (LastName, Password, ApiToken, Email, FirstName) VALUES (:LastName, :Password, :ApiToken, :Email, :FirstName)", user)
 	if err != nil {
 		return 0, err
 	}
 
-	return user.ID, nil
+	insertID, err := r.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return models.UserID(insertID), nil
 }

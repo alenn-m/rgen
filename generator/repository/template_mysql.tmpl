@@ -3,49 +3,68 @@ package mysql
 import (
     "{{.Root}}/models"
     "{{.Root}}/util/paginate"
-    "github.com/jinzhu/gorm"
+    "github.com/jmoiron/sqlx"
 )
 
 type {{.Model}}DB struct {
-    client *gorm.DB
+    client *sqlx.DB
 }
 
-func New{{.Model}}DB(client *gorm.DB) *{{.Model}}DB {
+func New{{.Model}}DB(client *sqlx.DB) *{{.Model}}DB {
     return &{{.Model}}DB{client: client}
 }
 
 func (u *{{.Model}}DB) FindByID(id models.{{.Model}}ID) (*models.{{.Model}}, error) {
     var item models.{{.Model}}
 
-    err := u.client.Where("id = ?", id).Find(&item).Error
+    err := u.client.Get(&item, "SELECT * FROM {{ Pluralize .Model }} WHERE {{ .Model }}ID = ?", id)
+    if err != nil {
+        return nil, err
+    }
 
-    return &item, err
+    return &item, nil
 }
 
 func (u *{{.Model}}DB) ListAll(page int) ([]models.{{.Model}}, int, error) {
     var items []models.{{.Model}}
 
-    err := paginate.Paginate(u.client.New(), page).Find(&items).Error
+    query := paginate.Paginate("SELECT * FROM {{ Pluralize .Model }}", page)
+    err := u.client.Select(&items, query)
     if err != nil {
         return nil, 0, err
     }
 
     count := 0
-    err = u.client.Model(&models.{{.Model}}{}).Count(&count).Error
+    err = u.client.Get(&count, "SELECT COUNT({{ .Model }}ID) FROM {{ Pluralize .Model }}")
 
     return items, count, err
 }
 
 func (u *{{.Model}}DB) Insert(item *models.{{.Model}}) (models.{{.Model}}ID, error) {
-    err := u.client.Create(&item).Error
+    r, err := u.client.NamedExec("INSERT INTO {{ Pluralize .Model }} ({{ .Fields }}) VALUES ({{ .NamedFields}})", item)
+    if err != nil {
+        return 0, err
+    }
 
-    return item.ID, err
+    insertID, err := r.LastInsertId()
+    if err != nil {
+        return 0, err
+    }
+
+    return models.{{ .Model }}ID(insertID), nil
 }
 
 func (u *{{.Model}}DB) Update(item *models.{{.Model}}) error {
-    return u.client.Model(&item).Updates(item).Error
+    _, err := u.client.NamedExec(`UPDATE {{ Pluralize .Model }}
+        SET {{ .UpdateFields }}
+        WHERE {{ .Model }}ID = :{{ .Model }}ID
+    `, item)
+
+    return err
 }
 
 func (u *{{.Model}}DB) Delete(id models.{{.Model}}ID) error {
-    return u.client.Where("id = ?", id).Delete(&models.{{.Model}}{}).Error
+    _, err := u.client.Exec("DELETE FROM {{ Pluralize .Model }} WHERE {{ .Model }}ID = ?", id)
+
+    return err
 }

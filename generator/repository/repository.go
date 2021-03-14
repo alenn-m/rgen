@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/config"
 	"github.com/alenn-m/rgen/util/templates"
 	"github.com/jinzhu/inflection"
@@ -27,6 +28,7 @@ var dir = "api"
 
 type Input struct {
 	Name    string
+	Fields  []parser.Field
 	Actions []string
 	Public  bool
 }
@@ -38,10 +40,13 @@ type Repository struct {
 }
 
 type parsedData struct {
-	Root       string
-	Package    string
-	Model      string
-	Controller string
+	Root         string
+	Package      string
+	Model        string
+	Fields       string
+	NamedFields  string
+	UpdateFields string
+	Controller   string
 }
 
 func (r *Repository) Init(input *Input, conf *config.Config) {
@@ -98,6 +103,9 @@ func (r *Repository) Generate() error {
 
 			return false
 		},
+		"Pluralize": func(input string) string {
+			return inflection.Plural(input)
+		},
 	})
 	if err != nil {
 		return err
@@ -148,6 +156,20 @@ func (r *Repository) parseData() {
 		Controller: strings.Title(inflection.Plural(r.Input.Name)) + "Controller",
 		Root:       r.Config.Package,
 	}
+
+	f := []string{}
+	nf := []string{}
+	uf := []string{}
+
+	for _, item := range r.Input.Fields {
+		f = append(f, item.Key)
+		nf = append(nf, fmt.Sprintf(":%s", item.Key))
+		uf = append(uf, fmt.Sprintf("%s = :%s", item.Key, item.Key))
+	}
+
+	r.ParsedData.Fields = strings.Join(f, ", ")
+	r.ParsedData.NamedFields = strings.Join(nf, ", ")
+	r.ParsedData.UpdateFields = strings.Join(uf, ", ")
 }
 
 func (r *Repository) saveFile(content []byte, location string) error {
