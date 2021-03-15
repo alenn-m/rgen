@@ -78,7 +78,7 @@ func (m *Model) Generate() error {
 }
 
 func (m *Model) parseData() error {
-	fields := fmt.Sprintf("ID %sID `json:\"id\" db:\"%s\"`\n", m.Input.Name, strcase.ToCamel(m.Input.Name))
+	fields := fmt.Sprintf("ID %sID `json:\"id\" db:\"%sID\"`\n", m.Input.Name, strcase.ToCamel(m.Input.Name))
 	for _, item := range m.Input.Fields {
 		camelName := strcase.ToCamel(item.Key)
 		snakeName := strcase.ToSnake(item.Key)

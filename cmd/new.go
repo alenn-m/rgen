@@ -99,11 +99,11 @@ var newCmd = &cobra.Command{
 						"ApiToken":  "string",
 						"Password":  "string",
 					},
-					Validation: map[string][]string{
-						"FirstName": {"Required"},
-						"LastName":  {"Required"},
-						"Email":     {"Required", "Email"},
-					},
+					// Validation: map[string][]string{
+					// 	"FirstName": {"Required"},
+					// 	"LastName":  {"Required"},
+					// 	"Email":     {"Required", "Email"},
+					// },
 					Actions:       []string{},
 					Relationships: nil,
 					OnlyModel:     false,

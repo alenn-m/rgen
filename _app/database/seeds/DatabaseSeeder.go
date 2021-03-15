@@ -7,11 +7,11 @@ import (
 )
 
 type Seeder interface {
-	Execute() error
+	Execute(*sqlx.DB) error
 }
 
 var seeders = []Seeder{
-	// new(UsersSeeder),
+	new(UserSeeder),
 }
 
 type DatabaseSeeder struct {
@@ -30,7 +30,7 @@ func (d *DatabaseSeeder) Run() error {
 	}()
 
 	for _, s := range seeders {
-		if err := s.Execute(); err != nil {
+		if err := s.Execute(d.Client); err != nil {
 			return err
 		}
 	}

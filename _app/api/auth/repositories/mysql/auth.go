@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/aa/aa/models"
+	"{{Root}}/models"
 	"github.com/jmoiron/sqlx"
 )
 

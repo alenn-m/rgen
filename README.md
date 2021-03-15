@@ -17,6 +17,7 @@ Run `rgen -h` to see a list of all commands:
       build       Builds API from YAML file
       generate    Generates API CRUD with given configuration
       help        Help about any command
+      migrate     Migrates database
       new         Initializes the REST API
 
 ### Usage
@@ -39,15 +40,6 @@ Models:
       FirstName: string
       LastName: string
       Password: string
-    SkipController: false
-    Validation:
-      Email:
-      - Required
-      - Email
-      FirstName:
-      - Required
-      LastName:
-      - Required
     Actions: []
     Relationships: {}
     OnlyModel: false
@@ -56,7 +48,6 @@ Models:
 All model definitions are under `Models` namespace. 
 Each model contains:
 - Properties
-- Validation
 - Actions
 - Relationships
 - OnlyModel
@@ -65,10 +56,8 @@ Each model contains:
 #### Properties
 This is main portion of `draft.yaml`. In this section you setup all fields for your models.\
 Fields are listed in `key:value` format. `key` represents the name of the field, while `value` represents the data type.\
-Since `rgen` uses `gorm` as ORM, you can use any valid Go data type like: int, int64, string, float64 ...
-#### Validation
-Validation follows `key:[]value` format, in other words for single field you can add multiple rules.\
-`rgen` is using `github.com/go-ozzo/ozzo-validation` package for validation so please check the package documentation for more information.
+You can use any valid Go data type like: int, int64, string, float64 ...
+
 #### Actions
 Actions contain the list of CRUD actions you want to have for a specific model. By default, all CRUD actions are created.\
 Possible values are (case-insensitive): `index, show, create, update, delete`
@@ -81,7 +70,7 @@ Relationships:
     User: belongsTo
     Post: hasMany
 ```
-Possible values are: `belongsTo, belongsToMany, hasMany`.\
+Possible values are: `belongsTo, manyToMany, hasMany`.\
 **Warning:** IDs are not created automatically. For example if *User* has many *Posts*, you have to add *UserID*\
 field to *Post* model.
 #### OnlyModel
@@ -95,23 +84,21 @@ The default value is **false**.
 ### File structure
 
 ```
-.
+./
 ├── api
-│   ├── auth
-│   │   ├── controller.go
-│   │   ├── repositories
-│   │   │   └── mysql
-│   │   │       └── auth.go
-│   │   ├── repository.go
-│   │   └── transport.go
-│   └── user
+│   └── auth
 │       ├── controller.go
 │       ├── repositories
 │       │   └── mysql
-│       │       └── user.go
+│       │       └── auth.go
 │       ├── repository.go
 │       └── transport.go
 ├── config.yaml
+├── database
+│   ├── migrations
+│   └── seeds
+│       ├── DatabaseSeeder.go
+│       └── UserSeeder.go
 ├── draft.yaml
 ├── go.mod
 ├── go.sum
@@ -119,10 +106,8 @@ The default value is **false**.
 ├── middleware
 │   ├── AuthMiddleware.go
 │   └── ExampleMiddleware.go
-├── migrations.go
 ├── models
-│   ├── Base.go
-│   └── User.go
+│   └── Base.go
 └── util
     ├── auth
     │   ├── auth.go
@@ -139,6 +124,7 @@ The default value is **false**.
     │   └── response.go
     └── validators
         └── Equals.go
+
 ```
 
 ### Next steps
@@ -173,8 +159,9 @@ Flags:
 rgen generate -n "Comment" -f "title:string, body:string, user_id:int64" -a "index, create, delete"
 ```
 ### TODO
+- [ ] Automatic validation
 - [ ] Unit/integration tests
-- [ ] Code refactoring
+- [X] Code refactoring
 - [ ] Better documentation
 - [ ] Add support for more databases (currently only *MySQL* is supported)
 
