@@ -13,18 +13,23 @@ import (
 )
 
 var (
-	flags = flag.NewFlagSet("goose", flag.ExitOnError)
-	dir   = "./database/migrations"
+	sequential    bool
+	migrationType string
+	flags         = flag.NewFlagSet("goose", flag.ExitOnError)
+	dir           = "./database/migrations"
 )
 
 func init() {
-	rootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(migrationCmd)
+
+	migrationCmd.PersistentFlags().BoolVar(&sequential, "sequential", false, "Create migration in sequential order")
+	migrationCmd.PersistentFlags().StringVarP(&migrationType, "migration-type", "t", "sql", "Migration type (sql|go)")
 }
 
-// migrateCmd represents the migrate command
-var migrateCmd = &cobra.Command{
-	Use:   "migrate",
-	Short: "Migrates database",
+// migrationCmd represents the migrate command
+var migrationCmd = &cobra.Command{
+	Use:   "migration",
+	Short: "Manages database migrations",
 	Run: func(cmd *cobra.Command, args []string) {
 		err := godotenv.Load()
 		if err != nil {
@@ -55,11 +60,12 @@ var migrateCmd = &cobra.Command{
 
 		command := args[0]
 		arguments := []string{}
-		if len(args) > 3 {
-			arguments = append(arguments, args[3:]...)
+		if len(args) > 1 {
+			arguments = append(arguments, args[1:]...)
+			arguments = append(arguments, migrationType)
 		}
 
-		goose.SetSequential(true)
+		goose.SetSequential(sequential)
 		if err := goose.Run(command, db, dir, arguments...); err != nil {
 			log.Fatalf("goose %v: %v", command, err)
 		}
