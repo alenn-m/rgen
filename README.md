@@ -17,8 +17,9 @@ Run `rgen -h` to see a list of all commands:
       build       Builds API from YAML file
       generate    Generates API CRUD with given configuration
       help        Help about any command
-      migrate     Migrates database
+      migration   Manages database migrations
       new         Initializes the REST API
+
 
 ### Usage
 
@@ -84,7 +85,7 @@ The default value is **false**.
 ### File structure
 
 ```
-./
+.
 ├── api
 │   └── auth
 │       ├── controller.go
@@ -95,13 +96,11 @@ The default value is **false**.
 │       └── transport.go
 ├── config.yaml
 ├── database
-│   ├── migrations
 │   └── seeds
 │       ├── DatabaseSeeder.go
 │       └── UserSeeder.go
 ├── draft.yaml
 ├── go.mod
-├── go.sum
 ├── main.go
 ├── middleware
 │   ├── AuthMiddleware.go
