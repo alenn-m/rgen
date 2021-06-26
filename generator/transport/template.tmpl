@@ -10,7 +10,10 @@ import (
     "{{.Root}}/util/resp"
     "{{.Root}}/util/paginate"
     "{{.Root}}/models"
+    "{{.Root}}/api/{{.Package}}/repositories/mysql"
+    authService "{{.Root}}/util/auth"
     "github.com/go-chi/chi"
+    "github.com/jmoiron/sqlx"
     // . "github.com/go-ozzo/ozzo-validation/v4"
     // "github.com/go-ozzo/ozzo-validation/v4/is"
 )
@@ -21,8 +24,8 @@ type API struct {
 
 const PREFIX = "{{.Prefix}}"
 
-func New(router chi.Router, svc Repository) {
-    a := API{svc: svc}
+func New(router chi.Router, dbClient *sqlx.DB, authSvc *authService.AuthService) {
+    a := API{svc: NewController(mysql.New{{.Model}}DB(dbClient), authSvc)}
 
     router = router.Route(fmt.Sprintf("/%s", PREFIX), func(r chi.Router) {
         {{ if ActionUsed "INDEX" }}

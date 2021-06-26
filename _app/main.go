@@ -10,10 +10,6 @@ import (
 
 	// [services]
 	"{{Root}}/api/auth"
-	authDB "{{Root}}/api/auth/repositories/mysql"
-	"{{Root}}/api/user"
-	userDB "{{Root}}/api/user/repositories/mysql"
-	"{{Root}}/database/seeds"
 	"github.com/jmoiron/sqlx"
 	"github.com/patrickmn/go-cache"
 
@@ -54,20 +50,6 @@ func main() {
 		return s
 	})
 
-	if seed {
-		fmt.Println("Seeding database")
-
-		s := seeds.NewDatabaseSeeder(db)
-		err = s.Run()
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println("Done seeding database")
-
-		return
-	}
-
 	// memory cache can be replaced with any other type of cache
 	c := cache.New(time.Minute*60*24, 10*time.Minute)
 	caching := memory.NewMemoryCache(c)
@@ -80,16 +62,10 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		// authentication
-		auth.New(r, auth.NewController(
-			authDB.NewAuthDB(db), authSvc),
-		)
+		auth.New(r, db, authSvc)
 
 		r.Group(func(r chi.Router) {
 			r.Use(jwtauth.Verifier(authService.TokenAuth), mdw.AuthMiddleware)
-			// users
-			user.New(r, user.NewController(
-				userDB.NewUserDB(db), authSvc),
-			)
 
 			// [protected routes]
 		})

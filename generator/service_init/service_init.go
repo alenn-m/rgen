@@ -44,21 +44,16 @@ func (s *ServiceInit) Generate() error {
 	f := string(mainFile)
 
 	service := fmt.Sprintf(`"%s/api/%s"`, s.Config.Package, s.Input.LowerCaseName)
-	repo := fmt.Sprintf(`%sDB "%s/api/%s/repositories/mysql"`, s.Input.LowerCaseName, s.Config.Package, s.Input.LowerCaseName)
-	if !strings.Contains(f, service) && !strings.Contains(f, repo) {
-		importToInsert := fmt.Sprintf("%s\n%s", service, repo)
-
+	if !strings.Contains(f, service) {
 		authSvc := ", authSvc"
 		if s.Input.Public {
 			authSvc = ""
 		}
 		serviceInitToInsert := fmt.Sprintf(`// %s
-			%s.New(r, %s.NewController(
-				%sDB.New%sDB(db)%s),
-			)`, inflection.Plural(s.Input.LowerCaseName), s.Input.LowerCaseName, s.Input.LowerCaseName, s.Input.LowerCaseName, strings.Title(s.Input.Name), authSvc)
+			%s.New(r, db%s)`, inflection.Plural(s.Input.LowerCaseName), s.Input.LowerCaseName, authSvc)
 
 		servicesIndex := strings.Index(f, "// [services]") + 13
-		f = f[:servicesIndex] + fmt.Sprintf("\n%s\n", importToInsert) + f[servicesIndex:]
+		f = f[:servicesIndex] + fmt.Sprintf("\n%s\n", service) + f[servicesIndex:]
 
 		if !s.Input.Public {
 			protectedRoutesIndex := strings.Index(f, "// [protected routes]") + 21

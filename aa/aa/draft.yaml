@@ -1,0 +1,19 @@
+Models:
+  User:
+    Properties:
+      ApiToken: string
+      Email: string
+      FirstName: string
+      LastName: string
+      Password: string
+    Actions: []
+    Relationships: {}
+    OnlyModel: false
+    Public: false
+  Post:
+    Properties:
+      Title: string
+      Body: string
+      UserID: int
+    Relationships:
+      User: belongsTo

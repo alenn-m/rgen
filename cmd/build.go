@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime/debug"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/migration"
@@ -88,6 +89,7 @@ var buildCmd = &cobra.Command{
 		pm.Init(tables)
 		err = pm.Generate()
 		if err != nil {
+			debug.PrintStack()
 			log.Error(err.Error())
 			return
 		}

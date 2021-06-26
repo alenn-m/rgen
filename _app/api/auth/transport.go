@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"{{Root}}/api/auth/repositories/mysql"
 	"{{Root}}/middleware"
 	authService "{{Root}}/util/auth"
 	"{{Root}}/util/req"
@@ -12,6 +13,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	. "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/jmoiron/sqlx"
 )
 
 type API struct {
@@ -20,8 +22,9 @@ type API struct {
 
 const PREFIX = "auth"
 
-func New(router chi.Router, svc Repository) {
-	a := API{svc: svc}
+func New(router chi.Router, dbClient *sqlx.DB, authSvc *authService.AuthService) {
+	a := API{svc: NewController(mysql.NewAuthDB(dbClient), authSvc)}
+
 	router = router.Route(fmt.Sprintf("/%s", PREFIX), func(r chi.Router) {
 		// Login
 		r.Post("/login", a.login)
