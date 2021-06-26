@@ -21,6 +21,7 @@ import (
 	"github.com/go-chi/jwtauth"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"{{Root}}/database/seeds"
 )
 
 var seed bool
@@ -49,6 +50,20 @@ func main() {
 	db.MapperFunc(func(s string) string {
 		return s
 	})
+
+	if seed {
+		fmt.Println("Seeding database")
+
+		s := seeds.NewDatabaseSeeder(db)
+		err = s.Run()
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println("Done seeding database")
+
+		return
+	}
 
 	// memory cache can be replaced with any other type of cache
 	c := cache.New(time.Minute*60*24, 10*time.Minute)
