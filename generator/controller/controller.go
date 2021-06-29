@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -110,17 +109,6 @@ func (c *Controller) createFile(location string) error {
 
 func (c *Controller) getServicePath(path string) string {
 	return fmt.Sprintf("%s/%s", path, strings.ToLower(c.Input.Name))
-}
-
-func (c *Controller) makeDirIfNotExist(location string) error {
-	if _, err := os.Stat(location); os.IsNotExist(err) {
-		err = os.MkdirAll(location, os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (c *Controller) saveFile(content []byte, location string) error {

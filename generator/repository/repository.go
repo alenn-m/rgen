@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"go/format"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/config"
+	"github.com/alenn-m/rgen/util/files"
 	"github.com/alenn-m/rgen/util/templates"
 	"github.com/jinzhu/inflection"
 )
@@ -83,7 +83,7 @@ func (r *Repository) Generate() error {
 	}
 
 	servicePath := r.getServicePath(location)
-	err = r.makeDirIfNotExist(servicePath)
+	err = files.MakeDirIfNotExist(servicePath)
 	if err != nil {
 		return err
 	}
@@ -117,7 +117,7 @@ func (r *Repository) Generate() error {
 	}
 
 	repositoriesPath := r.getRepositoryPath(servicePath)
-	err = r.makeDirIfNotExist(repositoriesPath)
+	err = files.MakeDirIfNotExist(repositoriesPath)
 	if err != nil {
 		return err
 	}
@@ -136,17 +136,6 @@ func (r *Repository) getServicePath(path string) string {
 
 func (r *Repository) getRepositoryPath(servicePath string) string {
 	return fmt.Sprintf("%s/repositories/mysql", servicePath)
-}
-
-func (r *Repository) makeDirIfNotExist(location string) error {
-	if _, err := os.Stat(location); os.IsNotExist(err) {
-		err = os.MkdirAll(location, os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 func (r *Repository) parseData() {
