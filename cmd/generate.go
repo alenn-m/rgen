@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/alenn-m/rgen/generator"
 	"github.com/alenn-m/rgen/generator/controller"
 	"github.com/alenn-m/rgen/generator/migration"
 	"github.com/alenn-m/rgen/generator/model"
@@ -67,81 +68,26 @@ var generateCmd = &cobra.Command{
 }
 
 func generate(p *parser.Parser, conf *config.Config) error {
-	// Generate model
-	m := new(model.Model)
-	m.Init(&model.Input{
-		Name:          p.Name,
-		Fields:        p.Fields,
-		Relationships: p.Relationships,
-	}, conf)
-	err := m.Generate()
-	if err != nil {
-		log.Println(err.Error())
-		return err
-	}
+	steps := []generator.GeneratorStep{model.Model}
 
 	if !p.OnlyModel {
-		// Generate repositories
-		r := new(repository.Repository)
-		r.Init(&repository.Input{
-			Name:    p.Name,
-			Fields:  p.Fields,
-			Actions: p.Actions,
-			Public:  p.Public,
-		}, conf)
-		err = r.Generate()
-		if err != nil {
-			log.Println(err.Error())
-			return err
-		}
+		steps = append(steps,
+			repository.Repository,
+			controller.Controller,
+			service_init.ServiceInit,
+			&transport.Transport{},
+			migration.Migration,
+		)
+	}
 
-		// Generate controller
-		c := new(controller.Controller)
-		c.Init(&controller.Input{
-			Name:    p.Name,
-			Fields:  p.Fields,
-			Actions: p.Actions,
-		}, conf)
-		err = c.Generate()
-		if err != nil {
-			log.Println(err.Error())
-			return err
-		}
-
-		// Generate services
-		serviceInit := new(service_init.ServiceInit)
-		serviceInit.Init(&service_init.Input{
-			Name:   p.Name,
-			Public: p.Public,
-		}, conf)
-		err = serviceInit.Generate()
+	for _, step := range steps {
+		err := step.Generate(p, conf)
 		if err != nil {
 			return err
 		}
 
-		// Generate transport layer
-		t := new(transport.Transport)
-		t.Init(&transport.Input{
-			Name:    p.Name,
-			Fields:  p.Fields,
-			Actions: p.Actions,
-		}, conf)
-		err = t.Generate()
+		err = step.Save()
 		if err != nil {
-			log.Println(err.Error())
-			return err
-		}
-
-		// Generate migrations
-		mg := new(migration.Migration)
-		mg.Init(&migration.Input{
-			Name:          p.Name,
-			Fields:        p.Fields,
-			Relationships: p.Relationships,
-		}, conf)
-		err = mg.Generate()
-		if err != nil {
-			log.Println(err.Error())
 			return err
 		}
 	}

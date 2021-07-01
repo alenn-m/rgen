@@ -1,0 +1,147 @@
+package test
+
+import (
+	"fmt"
+	"net/http"
+	"strconv"
+
+	"github.com/go-chi/chi"
+	"github.com/jmoiron/sqlx"
+	"github.com/test/testApp/api/test/repositories/mysql"
+	"github.com/test/testApp/models"
+	authService "github.com/test/testApp/util/auth"
+	"github.com/test/testApp/util/paginate"
+	"github.com/test/testApp/util/req"
+	"github.com/test/testApp/util/resp"
+	// . "github.com/go-ozzo/ozzo-validation/v4"
+	// "github.com/go-ozzo/ozzo-validation/v4/is"
+)
+
+type API struct {
+	svc Repository
+}
+
+const PREFIX = "tests"
+
+func New(router chi.Router, dbClient *sqlx.DB, authSvc *authService.AuthService) {
+	a := API{svc: NewController(mysql.NewTestDB(dbClient), authSvc)}
+
+	router = router.Route(fmt.Sprintf("/%s", PREFIX), func(r chi.Router) {
+
+		// Index
+		r.Get("/", a.index)
+
+		// Create
+		r.Post("/", a.store)
+
+		// Show
+		r.Get("/{id}", a.show)
+
+		// Update
+		r.Put("/{id}", a.update)
+
+		// Delete
+		r.Delete("/{id}", a.delete)
+
+	})
+}
+
+func (a *API) index(w http.ResponseWriter, r *http.Request) {
+	pReq := paginate.ParsePaginationReq(r)
+
+	result, total, err := a.svc.Index(r.Context(), pReq.Page)
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp.ReturnPaginatedSuccess(w, pReq.Page, total, result)
+}
+
+type StoreReq struct {
+}
+
+func (u *StoreReq) Validate() error {
+	return nil
+}
+
+func (a *API) store(w http.ResponseWriter, r *http.Request) {
+	var storeReq StoreReq
+
+	err := req.DecodeRequest(r, &storeReq)
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id, err := a.svc.Store(r.Context(), &storeReq)
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp.ReturnSuccess(w, id)
+}
+
+func (a *API) show(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result, err := a.svc.Show(r.Context(), models.TestID(id))
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp.ReturnSuccess(w, result)
+}
+
+type UpdateReq struct {
+}
+
+func (u *UpdateReq) Validate() error {
+	return nil
+}
+
+func (a *API) update(w http.ResponseWriter, r *http.Request) {
+	var updateReq UpdateReq
+
+	err := req.DecodeRequest(r, &updateReq)
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = a.svc.Update(r.Context(), &updateReq, models.TestID(id))
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp.ReturnSuccess(w, nil)
+}
+
+func (a *API) delete(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = a.svc.Delete(r.Context(), models.TestID(id))
+	if err != nil {
+		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	resp.ReturnSuccess(w, nil)
+}

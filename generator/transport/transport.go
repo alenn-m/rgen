@@ -20,17 +20,16 @@ var TEMPLATE string
 
 var dir = "api"
 
+// Input data
 type Input struct {
 	Name    string
 	Fields  []parser.Field
 	Actions []string
 }
 
+// Transport generator
 type Transport struct {
-	Input  *Input
-	Config *config.Config
-
-	ParsedData parsedData
+	parsedData parsedData
 }
 
 type parsedData struct {
@@ -39,19 +38,17 @@ type parsedData struct {
 	Prefix  string
 	Model   string
 	Fields  string
+	Actions []string
+	Content string
 }
 
-func (t *Transport) Init(input *Input, conf *config.Config) {
-	t.Input = input
-	t.Config = conf
-}
+// Generate generates the 'transport.go' file
+func (t *Transport) Generate(input *parser.Parser, conf *config.Config) error {
+	t.parseData(input, conf)
 
-func (t *Transport) Generate() error {
-	t.parseData()
-
-	content, err := templates.ParseTemplate(TEMPLATE, t.ParsedData, map[string]interface{}{
+	content, err := templates.ParseTemplate(TEMPLATE, t.parsedData, map[string]interface{}{
 		"ActionUsed": func(input string) bool {
-			for _, item := range t.Input.Actions {
+			for _, item := range t.parsedData.Actions {
 				if item == input {
 					return true
 				}
@@ -64,46 +61,49 @@ func (t *Transport) Generate() error {
 		return err
 	}
 
-	p, err := filepath.Abs(dir)
-	if err != nil {
-		return err
-	}
-
-	err = t.createFile(p, content)
-	if err != nil {
-		return err
-	}
+	t.parsedData.Content = content
 
 	return nil
 }
 
-func (t *Transport) parseData() *Transport {
-	t.ParsedData = parsedData{
-		Prefix:  strings.ToLower(inflection.Plural(t.Input.Name)),
-		Package: strings.ToLower(inflection.Singular(t.Input.Name)),
-		Root:    t.Config.Package,
-		Model:   strings.Title(inflection.Singular(t.Input.Name)),
-	}
-
-	for _, item := range t.Input.Fields {
-		t.ParsedData.Fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
-	}
-
-	return t
+// GetContent content getter
+func (t *Transport) GetContent() string {
+	return t.parsedData.Content
 }
 
-func (t *Transport) createFile(location, content string) error {
-	servicePath := fmt.Sprintf("%s/%s", location, strings.ToLower(t.Input.Name))
+// Save saves the generated content to file
+func (t *Transport) Save() error {
+	return t.createFile(t.GetContent())
+}
 
-	err := files.MakeDirIfNotExist(servicePath)
+func (t *Transport) parseData(input *parser.Parser, config *config.Config) {
+	t.parsedData = parsedData{
+		Prefix:  strings.ToLower(inflection.Plural(input.Name)),
+		Package: strings.ToLower(inflection.Singular(input.Name)),
+		Root:    config.Package,
+		Model:   strings.Title(inflection.Singular(input.Name)),
+		Actions: input.Actions,
+	}
+
+	for _, item := range input.Fields {
+		t.parsedData.Fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
+	}
+}
+
+func (t *Transport) createFile(content string) error {
+	location, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+
+	servicePath := fmt.Sprintf("%s/%s", location, t.parsedData.Package)
+
+	err = files.MakeDirIfNotExist(servicePath)
 	if err != nil {
 		return err
 	}
 
 	err = ioutil.WriteFile(fmt.Sprintf("%s/transport.go", servicePath), []byte(content), 0644)
-	if err != nil {
-		return err
-	}
 
-	return nil
+	return err
 }
