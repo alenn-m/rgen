@@ -1,73 +1,47 @@
 package model
 
 import (
-	"fmt"
-	"os"
 	"testing"
+
+	"github.com/alenn-m/rgen/generator/parser"
+	"github.com/alenn-m/rgen/util/config"
+	"github.com/sebdah/goldie/v2"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestModel_Generate(t *testing.T) {
-	// dir = "test"
-	// modelName := "Test"
-	//
-	// _, err := os.Stat(fmt.Sprintf("%s/%s", dir, modelName))
-	// if os.IsExist(err) {
-	// 	err = removeTestFile(dir)
-	// 	if err != nil {
-	// 		t.Error(err.Error())
-	// 	}
-	// }
-	//
-	// m := Model{
-	// 	Input: &Input{
-	// 		Name: "Test",
-	// 		Fields: []parser.Field{
-	// 			{
-	// 				Key:   "Name",
-	// 				Value: "string",
-	// 			},
-	// 		},
-	// 		Relationships: map[string]string{
-	// 			"User": "belongsTo",
-	// 			"Post": "manyToMany",
-	// 		},
-	// 	},
-	// 	Config:          &config.Config{Package: "github.com/test/testApp"},
-	// 	ParsedModelData: parsedModelData{},
-	// }
-	// err = m.Generate()
-	// if err != nil {
-	// 	t.Error(err.Error())
-	// }
-	//
-	// goldenFile, err := ioutil.ReadFile(fmt.Sprintf("%s/Test.golden.go", dir))
-	// if err != nil {
-	// 	t.Error(err.Error())
-	// }
-	//
-	// createdFile, err := ioutil.ReadFile(fmt.Sprintf("%s/Test.go", dir))
-	// if err != nil {
-	// 	t.Error(err.Error())
-	// }
-	//
-	// err = m.SetupAutoMigration()
-	// if err != nil {
-	// 	t.Error(err.Error())
-	// }
-	//
-	// if strings.TrimSpace(string(goldenFile)) != strings.TrimSpace(string(createdFile)) {
-	// 	t.Error("Generated file is not correct")
-	// }
-	//
-	// // cleanup
-	// err = removeTestFile(dir)
-	// if err != nil {
-	// 	t.Error(err.Error())
-	// }
+var modelName = "User"
+
+func TestModel_Generate__Success(t *testing.T) {
+	a := assert.New(t)
+
+	p := new(parser.Parser)
+	p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	p.Relationships = map[string]string{
+		"Post":    "hasMany",
+		"Profile": "belongsTo",
+		"Tag":     "manyToMany",
+	}
+
+	model := &Model{}
+	err := model.Generate(p, &config.Config{Package: modelName})
+	a.Nil(err)
+
+	g := goldie.New(t)
+	g.Assert(t, "TestModel_Generate__Success", []byte(model.GetContent()))
 }
 
-func removeTestFile(dir string) error {
-	err := os.Remove(fmt.Sprintf("%s/Test.go", dir))
+func TestModel_Generate__WrongRelationship(t *testing.T) {
+	a := assert.New(t)
 
-	return err
+	p := new(parser.Parser)
+	p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	p.Relationships = map[string]string{
+		"Post":    "hasMany",
+		"Profile": "wrongRelationship",
+	}
+
+	model := &Model{}
+	err := model.Generate(p, &config.Config{Package: modelName})
+	a.NotNil(err)
+	a.Equal(err, ErrInvalidRelationship)
 }

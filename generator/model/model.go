@@ -10,6 +10,7 @@ import (
 
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/config"
+	"github.com/alenn-m/rgen/util/files"
 	"github.com/alenn-m/rgen/util/templates"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
@@ -18,75 +19,69 @@ import (
 //go:embed "template.tmpl"
 var TEMPLATE string
 
+// ErrInvalidRelationship - returned when relationship is not valid
+var ErrInvalidRelationship = errors.New("invalid relationship")
+
+// BelongsTo - belongsToMany relationship
 const BelongsTo = "belongsTo"
+
+// HasMany - hasMany relationship
 const HasMany = "hasMany"
+
+// ManyToMany - manyToMany relationship
 const ManyToMany = "manyToMany"
 
 var dir = "models"
 
-type Input struct {
-	Name          string
-	Relationships map[string]string
-	Fields        []parser.Field
-}
-
+// Model generator
 type Model struct {
-	Input  *Input
-	Config *config.Config
-
-	ParsedModelData     parsedModelData
-	ParsedMigrationData parsedMigrationData
+	parsedData parsedData
 }
 
-type parsedMigrationData struct {
-	Models string
-	Root   string
+// Save saves the generated content to file
+func (m *Model) Save() error {
+	return m.createFile(m.GetContent())
 }
 
-type parsedModelData struct {
-	Model  string
-	Fields string
+// GetContent content getter
+func (m *Model) GetContent() string {
+	return m.parsedData.Content
 }
 
-func (m *Model) Init(input *Input, conf *config.Config) {
-	m.Input = input
-	m.Config = conf
+type parsedData struct {
+	Model   string
+	Fields  string
+	Package string
+	Content string
 }
 
-func (m *Model) Generate() error {
-	err := m.parseData()
+// Generate generates the '{MODEL}.go' file
+func (m *Model) Generate(input *parser.Parser, conf *config.Config) error {
+	err := m.parseData(input, conf)
 	if err != nil {
 		return err
 	}
 
-	p, err := filepath.Abs(dir)
+	content, err := templates.ParseTemplate(TEMPLATE, m.parsedData, nil)
 	if err != nil {
 		return err
 	}
 
-	content, err := templates.ParseTemplate(TEMPLATE, m.ParsedModelData, nil)
-	if err != nil {
-		return err
-	}
-
-	err = m.createFile(p, content)
-	if err != nil {
-		return err
-	}
+	m.parsedData.Content = content
 
 	return nil
 }
 
-func (m *Model) parseData() error {
-	fields := fmt.Sprintf("ID %sID `json:\"id\" db:\"%sID\"`\n", m.Input.Name, strcase.ToCamel(m.Input.Name))
-	for _, item := range m.Input.Fields {
+func (m *Model) parseData(input *parser.Parser, conf *config.Config) error {
+	fields := fmt.Sprintf("ID %sID `json:\"id\" db:\"%sID\"`\n", input.Name, strcase.ToCamel(input.Name))
+	for _, item := range input.Fields {
 		camelName := strcase.ToCamel(item.Key)
 		snakeName := strcase.ToSnake(item.Key)
 
 		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", camelName, item.Value, snakeName)
 	}
 
-	for key, relationship := range m.Input.Relationships {
+	for key, relationship := range input.Relationships {
 		switch relationship {
 		case BelongsTo:
 			fields += fmt.Sprintf("%s *%s `json:\"%s\"`\n", key, key, strcase.ToSnake(key))
@@ -95,24 +90,33 @@ func (m *Model) parseData() error {
 		case ManyToMany:
 			fields += fmt.Sprintf("%s []%s `json:\"%s\"`\n", inflection.Plural(key), key, strcase.ToSnake(key))
 		default:
-			return errors.New("invalid relationship")
+			return ErrInvalidRelationship
 		}
 	}
 
-	m.ParsedModelData = parsedModelData{
-		Model:  inflection.Singular(strings.Title(m.Input.Name)),
-		Fields: fields,
+	m.parsedData = parsedData{
+		Model:   inflection.Singular(strings.Title(input.Name)),
+		Fields:  fields,
+		Package: conf.Package,
 	}
 
 	return nil
 }
 
-func (m *Model) createFile(location, content string) error {
-	filename := strings.Title(strings.ToLower(m.Input.Name))
-	err := ioutil.WriteFile(fmt.Sprintf("%s/%s.go", location, filename), []byte(content), 0644)
+func (m *Model) createFile(content string) error {
+	location, err := filepath.Abs(dir)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	servicePath := fmt.Sprintf("%s/%s", location, m.parsedData.Package)
+
+	err = files.MakeDirIfNotExist(servicePath)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.go", servicePath, m.parsedData.Model), []byte(content), 0644)
+
+	return err
 }

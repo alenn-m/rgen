@@ -68,7 +68,7 @@ var generateCmd = &cobra.Command{
 }
 
 func generate(p *parser.Parser, conf *config.Config) error {
-	steps := []generator.GeneratorStep{model.Model}
+	steps := []generator.GeneratorStep{&model.Model{}}
 
 	if !p.OnlyModel {
 		steps = append(steps,

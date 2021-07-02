@@ -1,0 +1,16 @@
+package models
+
+type UserID int64
+
+type User struct {
+	ID        UserID   `json:"id" db:"UserID"`
+	FirstName string   `json:"first_name"`
+	LastName  string   `json:"last_name"`
+	Email     string   `json:"email"`
+	Age       int      `json:"age"`
+	Posts     []Post   `json:"posts"`
+	Profile   *Profile `json:"profile"`
+	Tags      []Tag    `json:"tag"`
+
+	Base
+}
