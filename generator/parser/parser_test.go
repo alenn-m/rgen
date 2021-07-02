@@ -2,6 +2,9 @@ package parser
 
 import (
 	"testing"
+
+	"github.com/alenn-m/rgen/util/misc"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParser_Parse(t *testing.T) {
@@ -57,4 +60,23 @@ func TestParser_Parse(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParser_ParseActions__Success(t *testing.T) {
+	a := assert.New(t)
+
+	p := new(Parser)
+	err := p.Parse("User", "first_name:string", "index, show, delete")
+	a.Nil(err)
+	a.Len(p.Actions, 3)
+	a.Equal([]string{misc.ACTION_INDEX, misc.ACTION_SHOW, misc.ACTION_DELETE}, p.Actions)
+}
+
+func TestParser_ParseActions__WrongAction(t *testing.T) {
+	a := assert.New(t)
+
+	p := new(Parser)
+	err := p.Parse("User", "first_name:string", "index, show, wrong_action")
+	a.NotNil(err)
+	a.Equal(ErrInvalidAction, err)
 }
