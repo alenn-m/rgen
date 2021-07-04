@@ -74,7 +74,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 		steps = append(steps,
 			repository.Repository,
 			controller.Controller,
-			service_init.ServiceInit,
+			&service_init.ServiceInit{},
 			&transport.Transport{},
 			migration.Migration,
 		)

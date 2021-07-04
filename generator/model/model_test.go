@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/alenn-m/rgen/generator/parser"
@@ -28,6 +30,14 @@ func TestModel_Generate__Success(t *testing.T) {
 
 	g := goldie.New(t)
 	g.Assert(t, "TestModel_Generate__Success", []byte(model.GetContent()))
+
+	err = model.Save()
+	a.Nil(err)
+
+	fp := fmt.Sprintf("%s/%s.go", dir, modelName)
+	a.FileExists(fp)
+
+	_ = os.RemoveAll(dir)
 }
 
 func TestModel_Generate__WrongRelationship(t *testing.T) {

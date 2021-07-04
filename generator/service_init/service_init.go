@@ -4,46 +4,36 @@ import (
 	"fmt"
 	"go/format"
 	"io/ioutil"
-	"path/filepath"
 	"strings"
 
+	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/config"
 	"github.com/jinzhu/inflection"
 )
 
-type Input struct {
+var mainFileName = "main.go"
+
+type parsedData struct {
 	LowerCaseName string
 	Name          string
 	Public        bool
+	Package       string
+	Content       string
 }
 
 type ServiceInit struct {
-	Input  *Input
-	Config *config.Config
+	Input *parsedData
 }
 
-func (s *ServiceInit) Init(input *Input, conf *config.Config) {
-	s.Input = &Input{
-		LowerCaseName: strings.ToLower(inflection.Singular(input.Name)),
-		Name:          inflection.Singular(input.Name),
-	}
-	s.Config = conf
-}
+func (s *ServiceInit) Generate(input *parser.Parser, conf *config.Config) error {
+	s.parseData(input, conf)
 
-func (s *ServiceInit) Generate() error {
-	mainFilePath, err := filepath.Abs("main.go")
+	f, err := s.getMainFileContent()
 	if err != nil {
 		return err
 	}
 
-	mainFile, err := ioutil.ReadFile(mainFilePath)
-	if err != nil {
-		return err
-	}
-
-	f := string(mainFile)
-
-	service := fmt.Sprintf(`"%s/api/%s"`, s.Config.Package, s.Input.LowerCaseName)
+	service := fmt.Sprintf(`"%s/api/%s"`, s.Input.Package, s.Input.LowerCaseName)
 	if !strings.Contains(f, service) {
 		authSvc := ", authSvc"
 		if s.Input.Public {
@@ -68,10 +58,38 @@ func (s *ServiceInit) Generate() error {
 			return err
 		}
 
-		err = ioutil.WriteFile(mainFilePath, content, 0644)
-
-		return err
+		s.Input.Content = string(content)
 	}
 
 	return nil
+}
+
+func (s *ServiceInit) Save() error {
+	return ioutil.WriteFile(mainFileName, []byte(s.GetContent()), 0644)
+}
+
+func (s *ServiceInit) GetContent() string {
+	return s.Input.Content
+}
+
+func (s *ServiceInit) parseData(input *parser.Parser, conf *config.Config) {
+	s.Input = &parsedData{
+		LowerCaseName: strings.ToLower(inflection.Singular(input.Name)),
+		Name:          inflection.Singular(input.Name),
+		Package:       conf.Package,
+		Public:        input.Public,
+	}
+}
+
+func (s *ServiceInit) getMainFileContent() (string, error) {
+	f, err := ioutil.ReadFile(mainFileName)
+	if err != nil {
+		return "", err
+	}
+
+	return string(f), nil
+}
+
+func (s *ServiceInit) setMainFileLocation(location string) {
+	mainFileName = location
 }

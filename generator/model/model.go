@@ -109,14 +109,12 @@ func (m *Model) createFile(content string) error {
 		return err
 	}
 
-	servicePath := fmt.Sprintf("%s/%s", location, m.parsedData.Package)
-
-	err = files.MakeDirIfNotExist(servicePath)
+	err = files.MakeDirIfNotExist(location)
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.go", servicePath, m.parsedData.Model), []byte(content), 0644)
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.go", location, m.parsedData.Model), []byte(content), 0644)
 
 	return err
 }
