@@ -1,0 +1,11 @@
+-- +goose Up
+CREATE TABLE `CommentUsers` (
+`CommentID` INTEGER NOT NULL,
+`UserID` INTEGER NOT NULL,
+FOREIGN KEY (`CommentID`) REFERENCES `Comments` (`CommentID`),
+FOREIGN KEY (`UserID`) REFERENCES `Users` (`UserID`),
+PRIMARY KEY(`CommentID`, `UserID`)
+) ENGINE=InnoDB;
+
+-- +goose Down
+DROP TABLE `CommentUsers`;

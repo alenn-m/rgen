@@ -1,6 +1,7 @@
 package migration
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"text/template"
@@ -19,27 +20,21 @@ import (
 
 var dir = "database/migrations"
 
-type Input struct {
+type parsedData struct {
 	Name          string
 	Fields        []parser.Field
 	Relationships parser.Relationships
+	Package       string
+	Content       string
+	Template      *template.Template
 }
 
 type Migration struct {
-	Input  *Input
-	Config *config.Config
+	Input *parsedData
 }
 
-func (m *Migration) Init(input *Input, conf *config.Config) {
-	m.Input = input
-	m.Config = conf
-}
-
-func (m *Migration) Generate() error {
-	err := files.MakeDirIfNotExist(dir)
-	if err != nil {
-		return err
-	}
+func (m *Migration) Generate(input *parser.Parser, conf *config.Config) error {
+	m.parseData(input, conf)
 
 	attributes := []attrs.Attr{}
 	for _, item := range m.Input.Fields {
@@ -51,7 +46,7 @@ func (m *Migration) Generate() error {
 		attributes = append(attributes, a)
 	}
 
-	err = m.CreateMigration(&ctable.Options{
+	err := m.CreateMigration(&ctable.Options{
 		TableName:  m.Input.Name,
 		Path:       dir,
 		Type:       "sql",
@@ -63,6 +58,32 @@ func (m *Migration) Generate() error {
 	}
 
 	return nil
+}
+
+func (m *Migration) Save() error {
+	err := files.MakeDirIfNotExist(dir)
+	if err != nil {
+		return err
+	}
+
+	migrationName := fmt.Sprintf("create_%s_table", m.Input.Name)
+	goose.SetSequential(true)
+	err = goose.CreateWithTemplate(nil, dir, m.Input.Template, migrationName, "sql")
+
+	return err
+}
+
+func (m *Migration) GetContent() string {
+	return m.Input.Content
+}
+
+func (m *Migration) parseData(input *parser.Parser, conf *config.Config) {
+	m.Input = &parsedData{
+		Name:          input.Name,
+		Fields:        input.Fields,
+		Relationships: input.Relationships,
+		Package:       conf.Package,
+	}
 }
 
 func (m *Migration) CreateMigration(opts *ctable.Options) error {
@@ -131,12 +152,14 @@ func (m *Migration) generateGooseMigration(opts *ctable.Options, t Table) error 
 %s
 `, upString, downString)))
 
-	migrationName := fmt.Sprintf("create_%s_table", t.Name)
-	goose.SetSequential(true)
-	err = goose.CreateWithTemplate(nil, dir, sqlMigrationTemplate, migrationName, "sql")
+	var tpl bytes.Buffer
+	err = sqlMigrationTemplate.Execute(&tpl, nil)
 	if err != nil {
 		return err
 	}
+
+	m.Input.Content = tpl.String()
+	m.Input.Template = sqlMigrationTemplate
 
 	return nil
 }

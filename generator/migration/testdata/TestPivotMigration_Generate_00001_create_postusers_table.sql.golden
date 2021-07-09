@@ -1,0 +1,11 @@
+-- +goose Up
+CREATE TABLE `PostUsers` (
+`PostID` INTEGER NOT NULL,
+`UserID` INTEGER NOT NULL,
+FOREIGN KEY (`PostID`) REFERENCES `Posts` (`PostID`),
+FOREIGN KEY (`UserID`) REFERENCES `Users` (`UserID`),
+PRIMARY KEY(`PostID`, `UserID`)
+) ENGINE=InnoDB;
+
+-- +goose Down
+DROP TABLE `PostUsers`;

@@ -54,14 +54,22 @@ func (p *PivotMigration) Generate() error {
 		m2mTables[r] = m2m
 	}
 
-	m := new(Migration)
 	opts := &ctable.Options{
 		Path:       dir,
 		Type:       "sql",
 		Translator: translators.NewMySQL("", ""),
 	}
-	for _, m2m := range m2mTables {
+	for table, m2m := range m2mTables {
+		m := &Migration{Input: &parsedData{
+			Name: table,
+		}}
+
 		err := m.generateGooseMigration(opts, m2m)
+		if err != nil {
+			return err
+		}
+
+		err = m.Save()
 		if err != nil {
 			return err
 		}
