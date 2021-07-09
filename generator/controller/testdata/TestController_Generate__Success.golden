@@ -1,0 +1,45 @@
+package user
+
+import (
+	"context"
+
+	"User/models"
+)
+
+func (u *UsersController) Index(c context.Context, page int) ([]models.User, int, error) {
+	items, total, err := u.db.ListAll(page)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return items, total, nil
+}
+
+func (u *UsersController) Store(c context.Context, r *StoreReq) (models.UserID, error) {
+	id, err := u.db.Insert(&models.User{
+		FirstName: r.FirstName,
+		LastName:  r.LastName,
+		Email:     r.Email,
+		Age:       r.Age,
+	})
+
+	return id, err
+}
+
+func (u *UsersController) Show(c context.Context, id models.UserID) (*models.User, error) {
+	return u.db.FindByID(id)
+}
+
+func (u *UsersController) Update(c context.Context, r *UpdateReq, id models.UserID) error {
+	return u.db.Update(&models.User{
+		ID:        id,
+		FirstName: r.FirstName,
+		LastName:  r.LastName,
+		Email:     r.Email,
+		Age:       r.Age,
+	})
+}
+
+func (u *UsersController) Delete(c context.Context, id models.UserID) error {
+	return u.db.Delete(id)
+}

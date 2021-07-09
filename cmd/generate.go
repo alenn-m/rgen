@@ -76,7 +76,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 			controller.Controller,
 			&service_init.ServiceInit{},
 			&transport.Transport{},
-			migration.Migration,
+			&migration.Migration{},
 		)
 	}
 

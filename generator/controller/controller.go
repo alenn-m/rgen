@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"io/ioutil"
-	"path/filepath"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
@@ -20,67 +19,16 @@ var template string
 
 var dir = "api"
 
-type Input struct {
-	Name    string
-	Fields  []parser.Field
-	Actions []string
-}
-
 type Controller struct {
-	Input  *Input
-	Config *config.Config
-
-	ParsedData parsedData
+	parsedData parsedData
 }
 
-type parsedData struct {
-	Root       string
-	Package    string
-	Controller string
-	Model      string
-	Fields     string
-}
+func (c *Controller) Generate(input *parser.Parser, conf *config.Config) error {
+	c.parseData(input, conf)
 
-func (c *Controller) Init(input *Input, conf *config.Config) {
-	c.Input = input
-	c.Config = conf
-}
-
-func (c *Controller) Generate() error {
-	c.parseData()
-
-	p, err := filepath.Abs(dir)
-	if err != nil {
-		return err
-	}
-
-	err = c.createFile(p)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Controller) parseData() {
-	c.ParsedData = parsedData{
-		Package:    strings.ToLower(inflection.Singular(c.Input.Name)),
-		Controller: fmt.Sprintf("%sController", strings.Title(inflection.Plural(c.Input.Name))),
-		Model:      strings.Title(inflection.Singular(c.Input.Name)),
-		Root:       c.Config.Package,
-	}
-
-	for _, item := range c.Input.Fields {
-		item.Key = strcase.ToCamel(item.Key)
-
-		c.ParsedData.Fields += fmt.Sprintf("%s: r.%s", item.Key, item.Key) + ",\n"
-	}
-}
-
-func (c *Controller) createFile(location string) error {
-	content, err := templates.ParseTemplate(template, c.ParsedData, map[string]interface{}{
+	content, err := templates.ParseTemplate(template, c.parsedData, map[string]interface{}{
 		"ActionUsed": func(input string) bool {
-			for _, item := range c.Input.Actions {
+			for _, item := range c.parsedData.Actions {
 				if item == input {
 					return true
 				}
@@ -93,22 +41,51 @@ func (c *Controller) createFile(location string) error {
 		return err
 	}
 
-	servicePath := fmt.Sprintf("%s/%s", location, strings.ToLower(c.Input.Name))
-	err = files.MakeDirIfNotExist(servicePath)
-	if err != nil {
-		return err
-	}
-
-	err = c.saveFile([]byte(content), servicePath)
-	if err != nil {
-		return err
-	}
+	c.parsedData.Content = content
 
 	return nil
 }
 
-func (c *Controller) getServicePath(path string) string {
-	return fmt.Sprintf("%s/%s", path, strings.ToLower(c.Input.Name))
+func (c *Controller) Save() error {
+	servicePath := fmt.Sprintf("%s/%s", dir, strings.ToLower(c.parsedData.Name))
+	err := files.MakeDirIfNotExist(servicePath)
+	if err != nil {
+		return err
+	}
+
+	return c.saveFile([]byte(c.GetContent()), servicePath)
+}
+
+func (c *Controller) GetContent() string {
+	return c.parsedData.Content
+}
+
+type parsedData struct {
+	Name       string
+	Actions    []string
+	Root       string
+	Package    string
+	Controller string
+	Model      string
+	Fields     string
+	Content    string
+}
+
+func (c *Controller) parseData(input *parser.Parser, conf *config.Config) {
+	c.parsedData = parsedData{
+		Name:       input.Name,
+		Actions:    input.Actions,
+		Package:    strings.ToLower(inflection.Singular(input.Name)),
+		Controller: fmt.Sprintf("%sController", strings.Title(inflection.Plural(input.Name))),
+		Model:      strings.Title(inflection.Singular(input.Name)),
+		Root:       conf.Package,
+	}
+
+	for _, item := range input.Fields {
+		item.Key = strcase.ToCamel(item.Key)
+
+		c.parsedData.Fields += fmt.Sprintf("%s: r.%s", item.Key, item.Key) + ",\n"
+	}
 }
 
 func (c *Controller) saveFile(content []byte, location string) error {

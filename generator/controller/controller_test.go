@@ -7,44 +7,35 @@ import (
 
 	"github.com/alenn-m/rgen/generator/parser"
 	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/misc"
+	"github.com/sebdah/goldie/v2"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestController_Generate(t *testing.T) {
-	dir = "test"
-	controllername := "Test"
+var modelName = "User"
 
-	_, err := os.Stat(fmt.Sprintf("%s/%s", dir, controllername))
-	if os.IsExist(err) {
-		err = removeTestFile(dir)
-		if err != nil {
-			t.Error(err.Error())
-		}
+func TestController_Generate__Success(t *testing.T) {
+	a := assert.New(t)
+
+	p := new(parser.Parser)
+	p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	p.Relationships = map[string]string{
+		"Post":    "hasMany",
+		"Profile": "belongsTo",
+		"Tag":     "manyToMany",
 	}
 
-	c := Controller{
-		Input: &Input{
-			Name: "Test",
-			Fields: []parser.Field{
-				{
-					Key:   "Name",
-					Value: "string",
-				},
-			},
-			Actions: []string{misc.ACTION_CREATE, misc.ACTION_UPDATE},
-		},
-		Config:     &config.Config{Package: "github.com/test/testApp"},
-		ParsedData: parsedData{},
-	}
+	c := &Controller{}
+	err := c.Generate(p, &config.Config{Package: modelName})
+	a.Nil(err)
 
-	err = c.Generate()
-	if err != nil {
-		t.Error(err.Error())
-	}
-}
+	g := goldie.New(t)
+	g.Assert(t, "TestController_Generate__Success", []byte(c.GetContent()))
 
-func removeTestFile(dir string) error {
-	err := os.Remove(fmt.Sprintf("%s/Test.go", dir))
+	err = c.Save()
+	a.Nil(err)
 
-	return err
+	fp := fmt.Sprintf("%s/%s/controller.go", dir, c.parsedData.Package)
+	a.FileExists(fp)
+
+	_ = os.RemoveAll(dir)
 }
