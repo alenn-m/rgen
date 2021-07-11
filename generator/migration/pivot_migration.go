@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/alenn-m/rgen/util/config"
 	"github.com/gobuffalo/fizz"
 	"github.com/gobuffalo/fizz/translators"
 	"github.com/gobuffalo/pop/v5/genny/fizz/ctable"
@@ -19,11 +20,13 @@ type PivotMigrationEntry struct {
 // PivotMigration generator
 type PivotMigration struct {
 	Tables []PivotMigrationEntry
+	Config *config.Config
 }
 
 // Init initializes pivot generator
-func (p *PivotMigration) Init(tables []PivotMigrationEntry) {
+func (p *PivotMigration) Init(tables []PivotMigrationEntry, conf *config.Config) {
 	p.Tables = tables
+	p.Config = conf
 }
 
 // Generate generates pivot migration
@@ -64,9 +67,12 @@ func (p *PivotMigration) Generate() error {
 		Translator: translators.NewMySQL("", ""),
 	}
 	for table, m2m := range m2mTables {
-		m := &Migration{parsedData: &parsedData{
-			Name: table,
-		}}
+		m := &Migration{
+			parsedData: &parsedData{
+				Name:       table,
+				Sequential: p.Config.Migration.Sequential,
+			},
+		}
 
 		err := m.generateGooseMigration(opts, m2m)
 		if err != nil {

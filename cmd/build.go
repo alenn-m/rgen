@@ -86,7 +86,7 @@ var buildCmd = &cobra.Command{
 		// Generating pivot tables at the end to avoid duplicates
 		// and to be sure referenced tables exists
 		pm := new(migration.PivotMigration)
-		pm.Init(tables)
+		pm.Init(tables, conf)
 		err = pm.Generate()
 		if err != nil {
 			debug.PrintStack()

@@ -6,6 +6,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/alenn-m/rgen/util/config"
 	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 )
@@ -29,7 +30,11 @@ func TestPivotMigration_Generate(t *testing.T) {
 			TableTwo: "Post",
 		},
 	}
-	pm.Init(tables)
+	pm.Init(tables, &config.Config{
+		Migration: config.Migration{
+			Sequential: true,
+		},
+	})
 
 	err := pm.Generate()
 	a.Nil(err)
