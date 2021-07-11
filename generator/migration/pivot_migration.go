@@ -61,12 +61,20 @@ func (p *PivotMigration) Generate() error {
 		m2mTables[r] = m2m
 	}
 
+	tableKeys := []string{}
+	for tableKey := range m2mTables {
+		tableKeys = append(tableKeys, tableKey)
+	}
+
+	sort.Strings(tableKeys)
+
 	opts := &ctable.Options{
 		Path:       dir,
 		Type:       "sql",
 		Translator: translators.NewMySQL("", ""),
 	}
-	for table, m2m := range m2mTables {
+	for _, table := range tableKeys {
+		m2m := m2mTables[table]
 		m := &Migration{
 			parsedData: &parsedData{
 				Name:       table,
