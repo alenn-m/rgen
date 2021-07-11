@@ -159,7 +159,7 @@ rgen generate -n "Comment" -f "title:string, body:string, user_id:int64" -a "ind
 ```
 ### TODO
 - [ ] Automatic validation
-- [ ] Unit/integration tests
+- [X] Unit/integration tests
 - [X] Code refactoring
 - [ ] Better documentation
 - [ ] Add support for more databases (currently only *MySQL* is supported)
