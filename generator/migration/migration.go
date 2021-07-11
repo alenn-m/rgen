@@ -103,7 +103,7 @@ func (m *Migration) createMigration(opts *ctable.Options) error {
 	}
 
 	for _, attr := range opts.Attrs {
-		colType := m.fizzColType(attr.CommonType())
+		colType := strings.ToLower(attr.CommonType())
 
 		if err := t.Column(attr.Name.String(), colType, fizz.Options{}); err != nil {
 			return err
@@ -168,34 +168,4 @@ func (m *Migration) generateGooseMigration(opts *ctable.Options, t Table) error 
 	m.parsedData.Template = sqlMigrationTemplate
 
 	return nil
-}
-
-func (m *Migration) fizzColType(s string) string {
-	switch strings.ToLower(s) {
-	case "int", "int8", "int16", "int32", "int64":
-		return "integer"
-	case "time", "datetime":
-		return "timestamp"
-	case "uuid.uuid", "uuid":
-		return "uuid"
-	case "nulls.float32", "nulls.float64":
-		return "float"
-	case "slices.string", "slices.uuid", "[]string":
-		return "varchar[]"
-	case "slices.float", "[]float", "[]float32", "[]float64":
-		return "numeric[]"
-	case "slices.int":
-		return "int[]"
-	case "slices.map":
-		return "jsonb"
-	case "float", "float32", "float64":
-		return "decimal"
-	case "blob", "[]byte":
-		return "blob"
-	default:
-		if strings.HasPrefix(s, "nulls.") {
-			return m.fizzColType(strings.Replace(s, "nulls.", "", -1))
-		}
-		return strings.ToLower(s)
-	}
 }
