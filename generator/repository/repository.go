@@ -34,15 +34,7 @@ func (r *Repository) Generate(input *parser.Parser, conf *config.Config) error {
 	}
 
 	content, err := templates.ParseTemplate(contentString, r.parsedData, map[string]interface{}{
-		"ActionUsed": func(input string) bool {
-			for _, item := range r.parsedData.Actions {
-				if item == input {
-					return true
-				}
-			}
-
-			return false
-		},
+		"ActionUsed": templates.ActionUsed(r.parsedData.Actions),
 	})
 	if err != nil {
 		return err

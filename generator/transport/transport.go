@@ -47,15 +47,7 @@ func (t *Transport) Generate(input *parser.Parser, conf *config.Config) error {
 	t.parseData(input, conf)
 
 	content, err := templates.ParseTemplate(TEMPLATE, t.parsedData, map[string]interface{}{
-		"ActionUsed": func(input string) bool {
-			for _, item := range t.parsedData.Actions {
-				if item == input {
-					return true
-				}
-			}
-
-			return false
-		},
+		"ActionUsed": templates.ActionUsed(t.parsedData.Actions),
 	})
 	if err != nil {
 		return err

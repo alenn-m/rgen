@@ -29,15 +29,7 @@ func (c *Controller) Generate(input *parser.Parser, conf *config.Config) error {
 	c.parseData(input, conf)
 
 	content, err := templates.ParseTemplate(template, c.parsedData, map[string]interface{}{
-		"ActionUsed": func(input string) bool {
-			for _, item := range c.parsedData.Actions {
-				if item == input {
-					return true
-				}
-			}
-
-			return false
-		},
+		"ActionUsed": templates.ActionUsed(c.parsedData.Actions),
 	})
 	if err != nil {
 		return err

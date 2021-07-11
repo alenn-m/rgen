@@ -26,15 +26,7 @@ func (r *RepositoryImplementation) Generate(input *parser.Parser, conf *config.C
 	r.parsedData = parseData(input, conf)
 
 	contentString, err := templates.ParseTemplate(TEMPLATE_MYSQL, r.parsedData, map[string]interface{}{
-		"ActionUsed": func(input string) bool {
-			for _, item := range r.parsedData.Actions {
-				if item == input {
-					return true
-				}
-			}
-
-			return false
-		},
+		"ActionUsed": templates.ActionUsed(r.parsedData.Actions),
 		"Pluralize": func(input string) string {
 			return inflection.Plural(input)
 		},
