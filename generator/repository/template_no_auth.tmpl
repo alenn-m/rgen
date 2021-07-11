@@ -1,9 +1,9 @@
-package {{Package}}
+package {{.Package}}
 
 import (
     "context"
 
-    "{{Root}}/models"
+    "{{.Root}}/models"
 )
 
 type DBRepository interface {
@@ -14,7 +14,7 @@ type DBRepository interface {
     {{ if ActionUsed "DELETE" }} Delete(models.{{.Model}}ID) error {{ end }}
 }
 
-type {{Controller}} struct {
+type {{.Controller}} struct {
     db DBRepository
 }
 
@@ -26,8 +26,8 @@ type Repository interface {
     {{ if ActionUsed "DELETE" }} Delete(context.Context, models.{{.Model}}ID) error {{ end }}
 }
 
-func NewController(db DBRepository) *{{Controller}} {
-    return &{{Controller}}{
+func NewController(db DBRepository) *{{.Controller}} {
+    return &{{.Controller}}{
         db: db,
     }
 }

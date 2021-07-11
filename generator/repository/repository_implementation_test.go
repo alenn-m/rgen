@@ -11,9 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var modelName = "User"
-
-func TestRepository_Generate__Success(t *testing.T) {
+func TestRepositoryImplementation_Generate__Success(t *testing.T) {
 	a := assert.New(t)
 
 	p := new(parser.Parser)
@@ -24,23 +22,17 @@ func TestRepository_Generate__Success(t *testing.T) {
 		"Tag":     "manyToMany",
 	}
 
-	repo := &Repository{}
+	repo := &RepositoryImplementation{}
 	err := repo.Generate(p, &config.Config{Package: modelName})
 	a.Nil(err)
 
 	g := goldie.New(t)
-	g.Assert(t, "TestRepository_Generate__Private", []byte(repo.GetContent()))
-
-	p.Public = true
-	err = repo.Generate(p, &config.Config{Package: modelName})
-	a.Nil(err)
-
-	g.Assert(t, "TestRepository_Generate__Public", []byte(repo.GetContent()))
+	g.Assert(t, "TestRepositoryImplementation_Generate__Success", []byte(repo.GetContent()))
 
 	err = repo.Save()
 	a.Nil(err)
 
-	fp := fmt.Sprintf("%s/%s/repository.go", dir, repo.parsedData.Package)
+	fp := fmt.Sprintf("%s/%s.go", repo.getServicePath(dir), repo.parsedData.Package)
 	a.FileExists(fp)
 
 	_ = os.RemoveAll(dir)
