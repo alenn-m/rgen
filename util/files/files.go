@@ -55,10 +55,11 @@ func CopyDir(src string, dst string) (err error) {
 
 	si, err := os.Stat(src)
 	if err != nil {
-		return err
+		return
 	}
 	if !si.IsDir() {
-		return errors.New("source is not a directory")
+		err = errors.New("source is not a directory")
+		return
 	}
 
 	_, err = os.Stat(dst)
@@ -66,7 +67,7 @@ func CopyDir(src string, dst string) (err error) {
 		return
 	}
 	if err == nil {
-		return errors.New("destination already exists")
+		err = errors.New("destination already exists")
 	}
 
 	err = os.MkdirAll(dst, si.Mode())
@@ -110,6 +111,7 @@ func FileExists(filename string) bool {
 	if os.IsNotExist(err) {
 		return false
 	}
+
 	return !info.IsDir()
 }
 
