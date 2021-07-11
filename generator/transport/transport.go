@@ -20,7 +20,7 @@ var TEMPLATE string
 
 var dir = "api"
 
-// Input data
+// parsedData data
 type Input struct {
 	Name    string
 	Fields  []parser.Field

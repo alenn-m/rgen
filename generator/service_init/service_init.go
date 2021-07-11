@@ -21,10 +21,12 @@ type parsedData struct {
 	Content       string
 }
 
+// ServiceInit generator
 type ServiceInit struct {
-	Input *parsedData
+	parsedData *parsedData
 }
 
+// Generate generates service_init
 func (s *ServiceInit) Generate(input *parser.Parser, conf *config.Config) error {
 	s.parseData(input, conf)
 
@@ -33,19 +35,19 @@ func (s *ServiceInit) Generate(input *parser.Parser, conf *config.Config) error 
 		return err
 	}
 
-	service := fmt.Sprintf(`"%s/api/%s"`, s.Input.Package, s.Input.LowerCaseName)
+	service := fmt.Sprintf(`"%s/api/%s"`, s.parsedData.Package, s.parsedData.LowerCaseName)
 	if !strings.Contains(f, service) {
 		authSvc := ", authSvc"
-		if s.Input.Public {
+		if s.parsedData.Public {
 			authSvc = ""
 		}
 		serviceInitToInsert := fmt.Sprintf(`// %s
-			%s.New(r, db%s)`, inflection.Plural(s.Input.LowerCaseName), s.Input.LowerCaseName, authSvc)
+			%s.New(r, db%s)`, inflection.Plural(s.parsedData.LowerCaseName), s.parsedData.LowerCaseName, authSvc)
 
 		servicesIndex := strings.Index(f, "// [services]") + 13
 		f = f[:servicesIndex] + fmt.Sprintf("\n%s\n", service) + f[servicesIndex:]
 
-		if !s.Input.Public {
+		if !s.parsedData.Public {
 			protectedRoutesIndex := strings.Index(f, "// [protected routes]") + 21
 			f = f[:protectedRoutesIndex] + fmt.Sprintf("\n\n%s\n", serviceInitToInsert) + f[protectedRoutesIndex:]
 		} else {
@@ -58,22 +60,24 @@ func (s *ServiceInit) Generate(input *parser.Parser, conf *config.Config) error 
 			return err
 		}
 
-		s.Input.Content = string(content)
+		s.parsedData.Content = string(content)
 	}
 
 	return nil
 }
 
+// Save saves generated service_init content to file
 func (s *ServiceInit) Save() error {
 	return ioutil.WriteFile(mainFileName, []byte(s.GetContent()), 0644)
 }
 
+// GetContent returns service_init generated content
 func (s *ServiceInit) GetContent() string {
-	return s.Input.Content
+	return s.parsedData.Content
 }
 
 func (s *ServiceInit) parseData(input *parser.Parser, conf *config.Config) {
-	s.Input = &parsedData{
+	s.parsedData = &parsedData{
 		LowerCaseName: strings.ToLower(inflection.Singular(input.Name)),
 		Name:          inflection.Singular(input.Name),
 		Package:       conf.Package,

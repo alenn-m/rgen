@@ -25,19 +25,22 @@ type parsedData struct {
 	Fields        []parser.Field
 	Relationships parser.Relationships
 	Package       string
+	Sequential    bool
 	Content       string
 	Template      *template.Template
 }
 
+// Migration generator
 type Migration struct {
-	Input *parsedData
+	parsedData *parsedData
 }
 
+// Generate generates migration
 func (m *Migration) Generate(input *parser.Parser, conf *config.Config) error {
 	m.parseData(input, conf)
 
 	attributes := []attrs.Attr{}
-	for _, item := range m.Input.Fields {
+	for _, item := range m.parsedData.Fields {
 		a, err := attrs.Parse(fmt.Sprintf("%s:%s", item.Key, item.Value))
 		if err != nil {
 			return err
@@ -46,8 +49,8 @@ func (m *Migration) Generate(input *parser.Parser, conf *config.Config) error {
 		attributes = append(attributes, a)
 	}
 
-	err := m.CreateMigration(&ctable.Options{
-		TableName:  m.Input.Name,
+	err := m.createMigration(&ctable.Options{
+		TableName:  m.parsedData.Name,
 		Path:       dir,
 		Type:       "sql",
 		Attrs:      attributes,
@@ -60,33 +63,36 @@ func (m *Migration) Generate(input *parser.Parser, conf *config.Config) error {
 	return nil
 }
 
+// Save saves generated migration to file
 func (m *Migration) Save() error {
 	err := files.MakeDirIfNotExist(dir)
 	if err != nil {
 		return err
 	}
 
-	migrationName := fmt.Sprintf("create_%s_table", m.Input.Name)
-	goose.SetSequential(true)
-	err = goose.CreateWithTemplate(nil, dir, m.Input.Template, migrationName, "sql")
+	migrationName := fmt.Sprintf("create_%s_table", m.parsedData.Name)
+	goose.SetSequential(m.parsedData.Sequential)
+	err = goose.CreateWithTemplate(nil, dir, m.parsedData.Template, migrationName, "sql")
 
 	return err
 }
 
+// GetContent return generated migration content
 func (m *Migration) GetContent() string {
-	return m.Input.Content
+	return m.parsedData.Content
 }
 
 func (m *Migration) parseData(input *parser.Parser, conf *config.Config) {
-	m.Input = &parsedData{
+	m.parsedData = &parsedData{
 		Name:          input.Name,
 		Fields:        input.Fields,
 		Relationships: input.Relationships,
 		Package:       conf.Package,
+		Sequential:    conf.Migration.Sequential,
 	}
 }
 
-func (m *Migration) CreateMigration(opts *ctable.Options) error {
+func (m *Migration) createMigration(opts *ctable.Options) error {
 	t := NewTable(inflection.Plural(opts.TableName), map[string]interface{}{
 		"timestamps": false,
 	})
@@ -114,7 +120,7 @@ func (m *Migration) CreateMigration(opts *ctable.Options) error {
 		return err
 	}
 
-	for modelItem, relationhip := range m.Input.Relationships {
+	for modelItem, relationhip := range m.parsedData.Relationships {
 		if relationhip == model.BelongsTo {
 			fk := fmt.Sprintf("%sID", modelItem)
 			err = t.ForeignKey(fk, map[string]interface{}{
@@ -158,8 +164,8 @@ func (m *Migration) generateGooseMigration(opts *ctable.Options, t Table) error 
 		return err
 	}
 
-	m.Input.Content = tpl.String()
-	m.Input.Template = sqlMigrationTemplate
+	m.parsedData.Content = tpl.String()
+	m.parsedData.Template = sqlMigrationTemplate
 
 	return nil
 }

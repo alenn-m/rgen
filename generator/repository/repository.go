@@ -19,17 +19,12 @@ var TEMPLATE_NO_AUTH string
 
 var dir = "api"
 
-type Input struct {
-	Name    string
-	Fields  []parser.Field
-	Actions []string
-	Public  bool
-}
-
+// Repository generator
 type Repository struct {
 	parsedData parsedData
 }
 
+// Generate generates repository
 func (r *Repository) Generate(input *parser.Parser, conf *config.Config) error {
 	r.parsedData = parseData(input, conf)
 
@@ -58,6 +53,7 @@ func (r *Repository) Generate(input *parser.Parser, conf *config.Config) error {
 	return nil
 }
 
+// Save saves repository to file
 func (r *Repository) Save() error {
 	servicePath := r.getServicePath(dir)
 	err := files.MakeDirIfNotExist(servicePath)
@@ -68,6 +64,7 @@ func (r *Repository) Save() error {
 	return ioutil.WriteFile(fmt.Sprintf("%s/repository.go", servicePath), []byte(r.GetContent()), 0644)
 }
 
+// GetContent returns generated repository content
 func (r *Repository) GetContent() string {
 	return r.parsedData.RepoContent
 }

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 )
 
+// CopyFile copies file
 func CopyFile(src, dst string) (err error) {
 	in, err := os.Open(src)
 	if err != nil {
@@ -47,6 +48,7 @@ func CopyFile(src, dst string) (err error) {
 	return
 }
 
+// CopyDir copies directory
 func CopyDir(src string, dst string) (err error) {
 	src = filepath.Clean(src)
 	dst = filepath.Clean(dst)
@@ -102,6 +104,7 @@ func CopyDir(src string, dst string) (err error) {
 	return
 }
 
+// FileExists checks if file exists
 func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
@@ -110,6 +113,7 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
+// MakeDirIfNotExist makes directory if it doesn't exist
 func MakeDirIfNotExist(location string) error {
 	if _, err := os.Stat(location); os.IsNotExist(err) {
 		err = os.MkdirAll(location, os.ModePerm)

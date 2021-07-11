@@ -73,8 +73,8 @@ var newCmd = &cobra.Command{
 		}
 
 		config := config.Config{
-			Package:        rootPackage,
-			AutoMigrations: true,
+			Package:   rootPackage,
+			Migration: config.Migration{Sequential: false},
 		}
 
 		configData, err := yaml.Marshal(config)
@@ -138,9 +138,7 @@ var newCmd = &cobra.Command{
 
 				data = []byte(strings.Replace(string(data), "{{Root}}", rootPackage, -1))
 
-				err = ioutil.WriteFile(path, data, 0644)
-
-				return err
+				return ioutil.WriteFile(path, data, 0644)
 			}
 
 			return err

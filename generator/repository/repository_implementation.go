@@ -16,10 +16,12 @@ import (
 //go:embed "template_mysql.tmpl"
 var TEMPLATE_MYSQL string
 
+// RepositoryImplementation generator
 type RepositoryImplementation struct {
 	parsedData parsedData
 }
 
+// Generate generates repository_imlementation
 func (r *RepositoryImplementation) Generate(input *parser.Parser, conf *config.Config) error {
 	r.parsedData = parseData(input, conf)
 
@@ -51,8 +53,9 @@ func (r *RepositoryImplementation) Generate(input *parser.Parser, conf *config.C
 	return nil
 }
 
+// Save saves generated repository_implementation to file
 func (r *RepositoryImplementation) Save() error {
-	repositoriesPath := r.getServicePath(dir)
+	repositoriesPath := r.getServicePath()
 	err := files.MakeDirIfNotExist(repositoriesPath)
 	if err != nil {
 		return err
@@ -61,10 +64,11 @@ func (r *RepositoryImplementation) Save() error {
 	return ioutil.WriteFile(fmt.Sprintf("%s/%s.go", repositoriesPath, r.parsedData.Package), []byte(r.GetContent()), 0644)
 }
 
+// GetContent returns generated repository_implementation to file
 func (r *RepositoryImplementation) GetContent() string {
 	return r.parsedData.ImplContent
 }
 
-func (r *RepositoryImplementation) getServicePath(servicePath string) string {
-	return fmt.Sprintf("%s/repositories/mysql", servicePath)
+func (r *RepositoryImplementation) getServicePath() string {
+	return fmt.Sprintf("%s/%s/repositories/mysql", dir, r.parsedData.Package)
 }

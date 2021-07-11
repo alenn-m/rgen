@@ -9,6 +9,7 @@ import (
 	"github.com/gobuffalo/fizz"
 )
 
+// ForeignKey
 type ForeignKey struct {
 	Name       string
 	Column     string

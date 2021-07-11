@@ -32,7 +32,7 @@ func TestRepositoryImplementation_Generate__Success(t *testing.T) {
 	err = repo.Save()
 	a.Nil(err)
 
-	fp := fmt.Sprintf("%s/%s.go", repo.getServicePath(dir), repo.parsedData.Package)
+	fp := fmt.Sprintf("%s/%s.go", repo.getServicePath(), repo.parsedData.Package)
 	a.FileExists(fp)
 
 	_ = os.RemoveAll(dir)

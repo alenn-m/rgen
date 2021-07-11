@@ -19,10 +19,12 @@ var template string
 
 var dir = "api"
 
+// Controller generator
 type Controller struct {
 	parsedData parsedData
 }
 
+// Generate controller
 func (c *Controller) Generate(input *parser.Parser, conf *config.Config) error {
 	c.parseData(input, conf)
 
@@ -46,6 +48,7 @@ func (c *Controller) Generate(input *parser.Parser, conf *config.Config) error {
 	return nil
 }
 
+// Save saves generated controller
 func (c *Controller) Save() error {
 	servicePath := fmt.Sprintf("%s/%s", dir, strings.ToLower(c.parsedData.Name))
 	err := files.MakeDirIfNotExist(servicePath)
@@ -56,6 +59,7 @@ func (c *Controller) Save() error {
 	return c.saveFile([]byte(c.GetContent()), servicePath)
 }
 
+// GetContent returns generated controller content
 func (c *Controller) GetContent() string {
 	return c.parsedData.Content
 }

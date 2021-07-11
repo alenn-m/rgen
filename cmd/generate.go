@@ -73,6 +73,7 @@ func generate(p *parser.Parser, conf *config.Config) error {
 	if !p.OnlyModel {
 		steps = append(steps,
 			&repository.Repository{},
+			&repository.RepositoryImplementation{},
 			&controller.Controller{},
 			&service_init.ServiceInit{},
 			&transport.Transport{},

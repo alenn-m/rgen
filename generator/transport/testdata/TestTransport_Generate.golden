@@ -1,4 +1,4 @@
-package test
+package user
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/jmoiron/sqlx"
-	"github.com/test/testApp/api/test/repositories/mysql"
+	"github.com/test/testApp/api/user/repositories/mysql"
 	"github.com/test/testApp/models"
 	authService "github.com/test/testApp/util/auth"
 	"github.com/test/testApp/util/paginate"
@@ -21,10 +21,10 @@ type API struct {
 	svc Repository
 }
 
-const PREFIX = "tests"
+const PREFIX = "users"
 
 func New(router chi.Router, dbClient *sqlx.DB, authSvc *authService.AuthService) {
-	a := API{svc: NewController(mysql.NewTestDB(dbClient), authSvc)}
+	a := API{svc: NewController(mysql.NewUserDB(dbClient), authSvc)}
 
 	router = router.Route(fmt.Sprintf("/%s", PREFIX), func(r chi.Router) {
 
@@ -90,7 +90,7 @@ func (a *API) show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := a.svc.Show(r.Context(), models.TestID(id))
+	result, err := a.svc.Show(r.Context(), models.UserID(id))
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -121,7 +121,7 @@ func (a *API) update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.svc.Update(r.Context(), &updateReq, models.TestID(id))
+	err = a.svc.Update(r.Context(), &updateReq, models.UserID(id))
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -137,7 +137,7 @@ func (a *API) delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.svc.Delete(r.Context(), models.TestID(id))
+	err = a.svc.Delete(r.Context(), models.UserID(id))
 	if err != nil {
 		resp.ReturnError(w, err.Error(), http.StatusInternalServerError)
 		return

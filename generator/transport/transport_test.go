@@ -1,6 +1,8 @@
 package transport
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/alenn-m/rgen/generator/parser"
@@ -9,14 +11,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var modelName = "User"
+
 func TestTransport_Generate(t *testing.T) {
 	a := assert.New(t)
 
-	dir = "test"
-	repoName := "Test"
-
 	p := new(parser.Parser)
-	p.Parse(repoName, "", "")
+	p.Parse(modelName, "", "")
 
 	c := Transport{}
 	err := c.Generate(p, &config.Config{Package: "github.com/test/testApp"})
@@ -24,4 +25,12 @@ func TestTransport_Generate(t *testing.T) {
 
 	g := goldie.New(t)
 	g.Assert(t, "TestTransport_Generate", []byte(c.GetContent()))
+
+	err = c.Save()
+	a.Nil(err)
+
+	fp := fmt.Sprintf("%s/%s/transport.go", dir, c.parsedData.Package)
+	a.FileExists(fp)
+
+	_ = os.RemoveAll(dir)
 }

@@ -6,6 +6,7 @@ import (
 	"text/template"
 )
 
+// ParseTemplate parses template
 func ParseTemplate(tmpl string, data interface{}, functions map[string]interface{}) (string, error) {
 	modelTemplate, err := template.New("template").
 		Funcs(functions).

@@ -10,19 +10,23 @@ import (
 	"github.com/jinzhu/inflection"
 )
 
+// PivotMigrationEntry
 type PivotMigrationEntry struct {
 	TableOne string
 	TableTwo string
 }
 
+// PivotMigration generator
 type PivotMigration struct {
 	Tables []PivotMigrationEntry
 }
 
+// Init initializes pivot generator
 func (p *PivotMigration) Init(tables []PivotMigrationEntry) {
 	p.Tables = tables
 }
 
+// Generate generates pivot migration
 func (p *PivotMigration) Generate() error {
 	m2mTables := map[string]Table{}
 
@@ -60,7 +64,7 @@ func (p *PivotMigration) Generate() error {
 		Translator: translators.NewMySQL("", ""),
 	}
 	for table, m2m := range m2mTables {
-		m := &Migration{Input: &parsedData{
+		m := &Migration{parsedData: &parsedData{
 			Name: table,
 		}}
 
