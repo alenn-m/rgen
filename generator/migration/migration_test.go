@@ -18,7 +18,9 @@ func TestMigration_Generate__Success(t *testing.T) {
 	a := assert.New(t)
 
 	p := new(parser.Parser)
-	p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	err := p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	a.Nil(err)
+
 	p.Relationships = map[string]string{
 		"Post":    "hasMany",
 		"Profile": "belongsTo",
@@ -26,7 +28,7 @@ func TestMigration_Generate__Success(t *testing.T) {
 	}
 
 	m := &Migration{}
-	err := m.Generate(p, &config.Config{Package: modelName})
+	err = m.Generate(p, &config.Config{Package: modelName})
 	a.Nil(err)
 
 	g := goldie.New(t)

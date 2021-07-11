@@ -17,7 +17,9 @@ func TestModel_Generate__Success(t *testing.T) {
 	a := assert.New(t)
 
 	p := new(parser.Parser)
-	p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	err := p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	a.Nil(err)
+
 	p.Relationships = map[string]string{
 		"Post":    "hasMany",
 		"Profile": "belongsTo",
@@ -25,7 +27,7 @@ func TestModel_Generate__Success(t *testing.T) {
 	}
 
 	model := &Model{}
-	err := model.Generate(p, &config.Config{Package: modelName})
+	err = model.Generate(p, &config.Config{Package: modelName})
 	a.Nil(err)
 
 	g := goldie.New(t)
@@ -44,14 +46,16 @@ func TestModel_Generate__WrongRelationship(t *testing.T) {
 	a := assert.New(t)
 
 	p := new(parser.Parser)
-	p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	err := p.Parse(modelName, "first_name:string, last_name:string, email:string, age:int", "")
+	a.Nil(err)
+
 	p.Relationships = map[string]string{
 		"Post":    "hasMany",
 		"Profile": "wrongRelationship",
 	}
 
 	model := &Model{}
-	err := model.Generate(p, &config.Config{Package: modelName})
+	err = model.Generate(p, &config.Config{Package: modelName})
 	a.NotNil(err)
 	a.Equal(err, ErrInvalidRelationship)
 }

@@ -59,6 +59,7 @@ func (a *API) index(w http.ResponseWriter, r *http.Request) {
 }
 
 type StoreReq struct {
+	Name string `json:"name"`
 }
 
 func (u *StoreReq) Validate() error {
@@ -100,6 +101,7 @@ func (a *API) show(w http.ResponseWriter, r *http.Request) {
 }
 
 type UpdateReq struct {
+	Name string `json:"name"`
 }
 
 func (u *UpdateReq) Validate() error {

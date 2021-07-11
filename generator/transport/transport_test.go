@@ -17,10 +17,11 @@ func TestTransport_Generate(t *testing.T) {
 	a := assert.New(t)
 
 	p := new(parser.Parser)
-	p.Parse(modelName, "", "")
+	err := p.Parse(modelName, "name:string", "")
+	a.Nil(err)
 
 	c := Transport{}
-	err := c.Generate(p, &config.Config{Package: "github.com/test/testApp"})
+	err = c.Generate(p, &config.Config{Package: "github.com/test/testApp"})
 	a.Nil(err)
 
 	g := goldie.New(t)

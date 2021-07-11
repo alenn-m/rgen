@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/alenn-m/rgen/generator/parser"
@@ -81,7 +82,15 @@ func (m *Model) parseData(input *parser.Parser, conf *config.Config) error {
 		fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", camelName, item.Value, snakeName)
 	}
 
-	for key, relationship := range input.Relationships {
+	relationshipKeys := []string{}
+	for item := range input.Relationships {
+		relationshipKeys = append(relationshipKeys, item)
+	}
+
+	sort.Strings(relationshipKeys)
+
+	for _, key := range relationshipKeys {
+		relationship := input.Relationships[key]
 		switch relationship {
 		case BelongsTo:
 			fields += fmt.Sprintf("%s *%s `json:\"%s\"`\n", key, key, strcase.ToSnake(key))
