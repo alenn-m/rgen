@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/alenn-m/rgen)](https://goreportcard.com/report/github.com/alenn-m/rgen)
+
 ## RGEN - Go (GoLang) REST code generator
 
 ### Installation
