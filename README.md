@@ -1,4 +1,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/alenn-m/rgen)](https://goreportcard.com/report/github.com/alenn-m/rgen)
+[![codecov](https://codecov.io/gh/alenn-m/rgen/branch/master/graph/badge.svg)](https://codecov.io/gh/alenn-m/rgen)
+[![Maintainability](https://api.codeclimate.com/v1/badges/85d8f959f2b9dafc56f3/maintainability)](https://codeclimate.com/github/alenn-m/rgen/maintainability)
+
 
 ## RGEN - Go (GoLang) REST code generator
 
