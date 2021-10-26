@@ -119,11 +119,7 @@ func loadDraft(wd string) (*draft.Draft, error) {
 
 	var drft draft.Draft
 	err = yaml.Unmarshal(draftData, &drft)
-	if err != nil {
-		return nil, err
-	}
-
-	return &drft, nil
+	return &drft, err
 }
 
 func init() {
