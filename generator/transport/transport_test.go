@@ -17,10 +17,7 @@ func TestTransport_Generate(t *testing.T) {
 	a := assert.New(t)
 
 	p := new(parser.Parser)
-	p.Validation = parser.Validation{
-		"name": []string{"Required", "Min:5"},
-	}
-	err := p.Parse(modelName, "name:string", "")
+	err := p.Parse(modelName, "name:string#required|min:3", "")
 	a.Nil(err)
 
 	c := Transport{}

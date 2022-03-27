@@ -41,7 +41,7 @@ func (u *UserDB) ListAll(page int) ([]models.User, int, error) {
 }
 
 func (u *UserDB) Insert(item *models.User) (models.UserID, error) {
-	r, err := u.client.NamedExec("INSERT INTO Users (first_name,  last_name,  email,  age) VALUES (:first_name, : last_name, : email, : age)", item)
+	r, err := u.client.NamedExec("INSERT INTO Users (first_name, last_name, email, age) VALUES (:first_name, :last_name, :email, :age)", item)
 	if err != nil {
 		return 0, err
 	}
@@ -56,7 +56,7 @@ func (u *UserDB) Insert(item *models.User) (models.UserID, error) {
 
 func (u *UserDB) Update(item *models.User) error {
 	_, err := u.client.NamedExec(`UPDATE Users
-        SET first_name = :first_name,  last_name = : last_name,  email = : email,  age = : age
+        SET first_name = :first_name, last_name = :last_name, email = :email, age = :age
         WHERE UserID = :UserID
     `, item)
 
