@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/alenn-m/rgen/util/misc"
+	"github.com/alenn-m/rgen/v2/util/misc"
 )
 
 // ErrInvalidAction - invalid action
@@ -14,6 +14,9 @@ var ErrInvalidAction = fmt.Errorf("Action is not found, use one of the following
 
 // Relationships - list of relationships
 type Relationships map[string]string
+
+// Validation - list of validations
+type Validation map[string][]string
 
 // Field - single input field
 type Field struct {
@@ -27,6 +30,7 @@ type Parser struct {
 	Fields        []Field
 	Actions       []string
 	Relationships Relationships
+	Validation    Validation
 	OnlyModel     bool
 	Public        bool
 }

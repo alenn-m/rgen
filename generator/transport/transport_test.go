@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/alenn-m/rgen/generator/parser"
-	"github.com/alenn-m/rgen/util/config"
+	"github.com/alenn-m/rgen/v2/generator/parser"
+	"github.com/alenn-m/rgen/v2/util/config"
 	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,6 +17,9 @@ func TestTransport_Generate(t *testing.T) {
 	a := assert.New(t)
 
 	p := new(parser.Parser)
+	p.Validation = parser.Validation{
+		"name": []string{"Required", "Min:5"},
+	}
 	err := p.Parse(modelName, "name:string", "")
 	a.Nil(err)
 

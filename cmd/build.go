@@ -8,13 +8,13 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/alenn-m/rgen/generator/migration"
-	"github.com/alenn-m/rgen/generator/model"
-	"github.com/alenn-m/rgen/generator/parser"
-	"github.com/alenn-m/rgen/util/draft"
-	"github.com/alenn-m/rgen/util/files"
-	"github.com/alenn-m/rgen/util/log"
-	"github.com/alenn-m/rgen/util/misc"
+	"github.com/alenn-m/rgen/v2/generator/migration"
+	"github.com/alenn-m/rgen/v2/generator/model"
+	"github.com/alenn-m/rgen/v2/generator/parser"
+	"github.com/alenn-m/rgen/v2/util/draft"
+	"github.com/alenn-m/rgen/v2/util/files"
+	"github.com/alenn-m/rgen/v2/util/log"
+	"github.com/alenn-m/rgen/v2/util/misc"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -64,6 +64,7 @@ var buildCmd = &cobra.Command{
 				Actions:       actionsToUpper(item.Actions),
 				OnlyModel:     item.OnlyModel,
 				Public:        item.Public,
+				Validation:    item.Validation,
 			}
 
 			err := generate(&p, conf)

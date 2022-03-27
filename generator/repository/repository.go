@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/alenn-m/rgen/generator/parser"
-	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/files"
-	"github.com/alenn-m/rgen/util/templates"
+	"github.com/alenn-m/rgen/v2/generator/parser"
+	"github.com/alenn-m/rgen/v2/util/config"
+	"github.com/alenn-m/rgen/v2/util/files"
+	"github.com/alenn-m/rgen/v2/util/templates"
 )
 
 //go:embed "template_auth.tmpl"

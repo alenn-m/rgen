@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/alenn-m/rgen/util/config"
+	"github.com/alenn-m/rgen/v2/util/config"
 	"github.com/gobuffalo/fizz"
 	"github.com/gobuffalo/fizz/translators"
 	"github.com/gobuffalo/pop/v5/genny/fizz/ctable"

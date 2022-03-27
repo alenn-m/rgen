@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alenn-m/rgen/generator/parser"
-	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/files"
-	"github.com/alenn-m/rgen/util/templates"
+	"github.com/alenn-m/rgen/v2/generator/parser"
+	"github.com/alenn-m/rgen/v2/util/config"
+	"github.com/alenn-m/rgen/v2/util/files"
+	"github.com/alenn-m/rgen/v2/util/templates"
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 )
@@ -33,13 +33,14 @@ type Transport struct {
 }
 
 type parsedData struct {
-	Root    string
-	Package string
-	Prefix  string
-	Model   string
-	Fields  string
-	Actions []string
-	Content string
+	Root        string
+	Package     string
+	Prefix      string
+	Model       string
+	Fields      string
+	Actions     []string
+	Validations parser.Validation
+	Content     string
 }
 
 // Generate generates the 'transport.go' file
@@ -70,16 +71,32 @@ func (t *Transport) Save() error {
 
 func (t *Transport) parseData(input *parser.Parser, config *config.Config) {
 	t.parsedData = parsedData{
-		Prefix:  strings.ToLower(inflection.Plural(input.Name)),
-		Package: strings.ToLower(inflection.Singular(input.Name)),
-		Root:    config.Package,
-		Model:   strings.Title(inflection.Singular(input.Name)),
-		Actions: input.Actions,
+		Prefix:      strings.ToLower(inflection.Plural(input.Name)),
+		Package:     strings.ToLower(inflection.Singular(input.Name)),
+		Root:        config.Package,
+		Model:       strings.Title(inflection.Singular(input.Name)),
+		Actions:     input.Actions,
+		Validations: input.Validation,
 	}
 
 	for _, item := range input.Fields {
-		t.parsedData.Fields += fmt.Sprintf("%s %s `json:\"%s\"`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key))
+		t.parsedData.Fields += fmt.Sprintf(
+			"%s %s `json:\"%s\"%s`\n", strcase.ToCamel(item.Key), item.Value, strcase.ToSnake(item.Key), t.getValidations(item.Key),
+		)
 	}
+}
+
+func (t *Transport) getValidations(field string) string {
+	validations, found := t.parsedData.Validations[field]
+	if !found {
+		return ""
+	}
+
+	for k, item := range validations {
+		validations[k] = strings.ToLower(item)
+	}
+
+	return fmt.Sprintf(" validate:\"%s\"", strings.Join(validations, ","))
 }
 
 func (t *Transport) createFile(content string) error {

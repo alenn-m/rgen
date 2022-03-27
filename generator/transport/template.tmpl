@@ -1,4 +1,4 @@
-{{/*gotype: github.com/alenn-m/rgen/generator/transport.parsedData*/}}
+{{/*gotype: github.com/alenn-m/rgen/v2/generator/transport.parsedData*/}}
 package {{.Package}}
 
 import (
@@ -14,13 +14,14 @@ import (
     authService "{{.Root}}/util/auth"
     "github.com/go-chi/chi"
     "github.com/jmoiron/sqlx"
-    // . "github.com/go-ozzo/ozzo-validation/v4"
-    // "github.com/go-ozzo/ozzo-validation/v4/is"
+    "github.com/go-playground/validator/v10"
 )
 
 type API struct {
     svc Repository
 }
+
+var validate = validator.New()
 
 const PREFIX = "{{.Prefix}}"
 
@@ -69,7 +70,7 @@ type StoreReq struct {
 }
 
 func (u *StoreReq) Validate() error {
-    return nil
+    return validate.Struct(u)
 }
 
 func (a *API) store(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +114,7 @@ type UpdateReq struct {
 }
 
 func (u *UpdateReq) Validate() error {
-    return nil
+    return validate.Struct(u)
 }
 
 func (a *API) update(w http.ResponseWriter, r *http.Request) {

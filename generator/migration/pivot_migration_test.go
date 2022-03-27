@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/alenn-m/rgen/util/config"
+	"github.com/alenn-m/rgen/v2/util/config"
 	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 )

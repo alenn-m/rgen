@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/alenn-m/rgen/cmd"
+	"github.com/alenn-m/rgen/v2/cmd"
 )
 
 func main() {

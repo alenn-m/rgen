@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/files"
+	"github.com/alenn-m/rgen/v2/util/config"
+	"github.com/alenn-m/rgen/v2/util/files"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

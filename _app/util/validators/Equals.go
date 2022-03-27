@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"errors"
+	"github.com/go-errors/errors"
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )

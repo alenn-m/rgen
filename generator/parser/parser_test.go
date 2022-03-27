@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/alenn-m/rgen/util/misc"
+	"github.com/alenn-m/rgen/v2/util/misc"
 	"github.com/stretchr/testify/assert"
 )
 

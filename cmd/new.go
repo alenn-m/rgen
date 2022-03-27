@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/alenn-m/rgen/util/config"
-	"github.com/alenn-m/rgen/util/draft"
-	"github.com/alenn-m/rgen/util/files"
-	"github.com/alenn-m/rgen/util/log"
+	"github.com/alenn-m/rgen/v2/util/config"
+	"github.com/alenn-m/rgen/v2/util/draft"
+	"github.com/alenn-m/rgen/v2/util/files"
+	"github.com/alenn-m/rgen/v2/util/log"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -66,7 +66,7 @@ var newCmd = &cobra.Command{
 
 		destination := fmt.Sprintf("%s/%s", wd, pkg)
 
-		err = files.CopyDir(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/_app", os.Getenv("GOPATH")), destination)
+		err = files.CopyDir(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/v2/_app", os.Getenv("GOPATH")), destination)
 		if err != nil {
 			log.Error(err.Error())
 			return
@@ -99,11 +99,12 @@ var newCmd = &cobra.Command{
 						"ApiToken":  "string",
 						"Password":  "string",
 					},
-					// Validation: map[string][]string{
-					// 	"FirstName": {"Required"},
-					// 	"LastName":  {"Required"},
-					// 	"Email":     {"Required", "Email"},
-					// },
+					Validation: map[string][]string{
+						"FirstName": {"required"},
+						"LastName":  {"required"},
+						"Email":     {"required", "email"},
+						"Password":  {"required", "min:5"},
+					},
 					Actions:       []string{},
 					Relationships: nil,
 					OnlyModel:     false,

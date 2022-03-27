@@ -11,14 +11,15 @@ import (
 	"{{Root}}/util/resp"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/jwtauth"
-	. "github.com/go-ozzo/ozzo-validation/v4"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 )
 
 type API struct {
 	svc Repository
 }
+
+var validate = validator.New()
 
 const PREFIX = "auth"
 
@@ -34,15 +35,12 @@ func New(router chi.Router, dbClient *sqlx.DB, authSvc *authService.AuthService)
 }
 
 type LoginReq struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }
 
 func (l *LoginReq) Validate() error {
-	return ValidateStruct(l,
-		Field(&l.Email, Required, is.Email),
-		Field(&l.Password, Required),
-	)
+	return validate.Struct(l)
 }
 
 func (a *API) login(w http.ResponseWriter, r *http.Request) {
