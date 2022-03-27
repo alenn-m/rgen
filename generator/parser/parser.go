@@ -39,19 +39,34 @@ type Parser struct {
 func (p *Parser) Parse(name, fields, actions string) error {
 	p.Name = strings.TrimSpace(name)
 	p.Actions = misc.ACTIONS
+	p.Validation = make(Validation)
 
 	f := strings.Split(strings.TrimSpace(fields), ",")
 	for _, item := range f {
-		t := strings.Split(item, ":")
+		t := strings.SplitN(item, ":", 2)
 
 		if len(t) < 2 {
 			return fmt.Errorf("%s has incorrect format", item)
 		}
 		if len(t) > 1 {
-			key, value := t[0], t[1]
+			key, value := strings.TrimSpace(t[0]), strings.TrimSpace(t[1])
+
+			r := strings.Split(value, "#")
+
 			field := Field{
 				Key:   key,
-				Value: value,
+				Value: r[0],
+			}
+
+			if len(r) > 1 {
+				validations := strings.Split(r[1], "|")
+				for _, v := range validations {
+					if _, found := p.Validation[key]; found {
+						p.Validation[key] = append(p.Validation[key], strings.TrimSpace(v))
+					} else {
+						p.Validation[key] = []string{strings.TrimSpace(v)}
+					}
+				}
 			}
 
 			p.Fields = append(p.Fields, field)

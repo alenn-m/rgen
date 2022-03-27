@@ -46,6 +46,17 @@ Models:
       FirstName: string
       LastName: string
       Password: string
+    Validation:
+      Email:
+      - required
+      - email
+      FirstName:
+      - required
+      LastName:
+      - required
+      Password:
+      - required
+      - min:5
     Actions: []
     Relationships: {}
     OnlyModel: false
@@ -56,6 +67,7 @@ Each model contains:
 - Properties
 - Actions
 - Relationships
+- Validation
 - OnlyModel
 - Public
 
@@ -79,6 +91,12 @@ Relationships:
 Possible values are: `belongsTo, manyToMany, hasMany`.\
 **Warning:** IDs are not created automatically. For example if *User* has many *Posts*, you have to add *UserID*\
 field to *Post* model.
+#### Validation
+Validation field contains list of validations for each model property. This field is optional and if you omit this field,
+all fields will be optional.
+
+Behind the scene, `rgen` is using https://github.com/go-playground/validator for validations.
+Please check the package documentation to learn which fields you can use in your application.
 #### OnlyModel
 OnlyModel is a boolean value which indicates if you want to only create a model.\
 The default value is **false**.
@@ -90,7 +108,6 @@ The default value is **false**.
 ### File structure
 
 ```
-.
 ├── api
 │   └── auth
 │       ├── controller.go
@@ -127,7 +144,11 @@ The default value is **false**.
     ├── resp
     │   └── response.go
     └── validators
-        └── Equals.go
+        ├── Base.go
+        ├── Equals.go
+        ├── RecordExists.go
+        ├── RecordsExists.go
+        └── Unique.go
 
 ```
 
@@ -160,13 +181,9 @@ Flags:
 ```
 **Example:** To create a *Comment* resource with *title, body* and *user_id* fields run the following command:
 ```
-rgen generate -n "Comment" -f "title:string, body:string, user_id:int64" -a "index, create, delete"
+rgen generate -n "Comment" -f "title:string#required|min:5, body:string#required, user_id:int64#required" -a "index, create, delete"
 ```
 ### TODO
-- [ ] Automatic validation
-- [X] Unit/integration tests
-- [X] Code refactoring
-- [ ] Better documentation
 - [ ] Add support for more databases (currently only *MySQL* is supported)
 
 **PRs are welcome**

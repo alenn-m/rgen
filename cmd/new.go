@@ -66,7 +66,7 @@ var newCmd = &cobra.Command{
 
 		destination := fmt.Sprintf("%s/%s", wd, pkg)
 
-		err = files.CopyDir(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/v2/_app", os.Getenv("GOPATH")), destination)
+		err = files.CopyDir(fmt.Sprintf("%s/src/github.com/alenn-m/rgen/_app", os.Getenv("GOPATH")), destination)
 		if err != nil {
 			log.Error(err.Error())
 			return

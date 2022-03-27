@@ -80,3 +80,26 @@ func TestParser_ParseActions__WrongAction(t *testing.T) {
 	a.NotNil(err)
 	a.Equal(ErrInvalidAction, err)
 }
+
+func TestParser_ParseActions__ValidationSuccess(t *testing.T) {
+	a := assert.New(t)
+
+	p := new(Parser)
+	err := p.Parse("User", "name:string, email:string#required|email, password:string#required|min:3", "")
+	a.Nil(err)
+
+	a.NotNil(p.Validation)
+	a.Len(p.Validation, 2)
+	for key, items := range p.Validation {
+		if key == "email" {
+			a.Len(items, 2)
+			a.Contains(items, "email")
+			a.Contains(items, "required")
+		}
+		if key == "password" {
+			a.Len(items, 2)
+			a.Contains(items, "required")
+			a.Contains(items, "min:3")
+		}
+	}
+}
