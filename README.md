@@ -7,7 +7,8 @@
 
 ### Installation
 
-    go get -u github.com/alenn-m/rgen@v1.0.11
+    go get -u github.com/alenn-m/rgen/v2
+    go install github.com/alenn-m/rgen/v2
 
 This will install the generator in `$GOPATH/bin`. You can execute it by calling `rgen` command.
 
