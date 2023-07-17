@@ -19,12 +19,14 @@ type Relationships map[string]string
 type Validation map[string][]string
 
 // Field - single input field
+// Field represents a single input field. It has a Key and a Value.
 type Field struct {
 	Key   string
 	Value string
 }
 
 // Parser object
+// Parser represents a parser object. It has a Name, Fields, Actions, Relationships, Validation, OnlyModel, and Public.
 type Parser struct {
 	Name          string
 	Fields        []Field
@@ -36,6 +38,7 @@ type Parser struct {
 }
 
 // Parse - parses input data
+// Parse takes in a name, fields, and actions as inputs, and parses them into a Parser object.
 func (p *Parser) Parse(name, fields, actions string) error {
 	p.Name = strings.TrimSpace(name)
 	p.Actions = misc.ACTIONS
