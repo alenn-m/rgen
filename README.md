@@ -14,27 +14,21 @@ This will install the generator in `$GOPATH/bin`. You can execute it by calling 
 
 ### Getting started
 
-Run `rgen -h` to see a list of all commands:
-
-    Usage:
-       [command]
-    
-    Available Commands:
-      build       Builds API from YAML file
-      generate    Generates API CRUD with given configuration
-      help        Help about any command
-      migration   Manages database migrations
-      new         Initializes the REST API
+Here's a brief description of each command:
+- `build`: This command builds the API from a YAML file.
+- `generate`: This command generates API CRUD operations based on the given configuration.
+- `help`: This command provides help about any other command.
+- `migration`: This command manages database migrations.
+- `new`: This command initializes the REST API.
 
 
 ### Usage
 
-1. `cd` into your projects directory
-2. Run `rgen new` and answer the given questions (it will ask you which VSC you use, VSC domain and package name).
-Your answers will determine the root package and name of your project.
-3. Go into your newly created project and open `draft.yaml`. This file contains specification of your project.
-4. Run `rgen build` to create REST endpoints.
-
+Here's a more detailed explanation of each step:
+1. `cd` into your projects directory: This changes the current directory to your project's directory.
+2. Run `rgen new` and answer the given questions: This initializes the REST API. The questions will ask you about your VSC, VSC domain, and package name. Your answers will determine the root package and name of your project.
+3. Go into your newly created project and open `draft.yaml`: This file contains the specification of your project.
+4. Run `rgen build` to create REST endpoints: This builds the API from the `draft.yaml` file.
 ## draft.yaml
 
 After initialization of a project, the `draft.yaml` file will look like this:
@@ -108,83 +102,36 @@ The default value is **false**.
 
 ### File structure
 
-```
-├── api
-│   └── auth
-│       ├── controller.go
-│       ├── repositories
-│       │   └── mysql
-│       │       └── auth.go
-│       ├── repository.go
-│       └── transport.go
-├── config.yaml
-├── database
-│   └── seeds
-│       ├── DatabaseSeeder.go
-│       └── UserSeeder.go
-├── draft.yaml
-├── go.mod
-├── main.go
-├── middleware
-│   ├── AuthMiddleware.go
-│   └── ExampleMiddleware.go
-├── models
-│   └── Base.go
-└── util
-    ├── auth
-    │   ├── auth.go
-    │   └── interface.go
-    ├── cache
-    │   ├── memory
-    │   │   └── memory.go
-    │   └── service.go
-    ├── paginate
-    │   └── paginate.go
-    ├── req
-    │   └── req.go
-    ├── resp
-    │   └── response.go
-    └── validators
-        ├── Base.go
-        ├── Equals.go
-        ├── RecordExists.go
-        ├── RecordsExists.go
-        └── Unique.go
-
-```
+Here's a brief description of each file:
+- `api`: This directory contains the API code.
+- `config.yaml`: This file contains the configuration for the project.
+- `database`: This directory contains the database code.
+- `draft.yaml`: This file contains the specification of your project.
+- `go.mod`: This file contains the project's dependencies.
+- `main.go`: This is the main entry point for the project.
+- `middleware`: This directory contains the middleware code.
+- `models`: This directory contains the model code.
+- `util`: This directory contains utility code.
 
 ### Next steps
 
-- Edit `.env` file with MySQL credentials and other configurations
-- **Do not remove** config.yaml since this file contains global variables like *Package* which is used when generating new services.
-- Run `go mod tidy` to install all dependencies, and you're good to go.
-
+Here's a more detailed explanation of each step:
+- Edit `.env` file with MySQL credentials and other configurations: This sets up the database connection for the project.
+- **Do not remove** config.yaml since this file contains global variables like *Package* which is used when generating new services: This ensures that the project can generate new services correctly.
+- Run `go mod tidy` to install all dependencies: This installs all the dependencies that the project needs.
 ### *Generate* command
 
-`rgen` allows you to create single service as well, this is useful when you want to update existing project.<br/><br/>
-**WARNING:** `rgen` relies on various markers and file paths to add new services, if you want to use `rgen generate` command,
-then **do not remove** markers *[services], [protected routes] and [public routes]* inside `main.go`.
-```
-rgen generate -h
--------------------------------------------
-Generates API CRUD with given configuration
-
-Usage:
-   generate [flags]
-
-Flags:
-  -a, --actions string   CRUD actions --actions='index,create,show,update,delete'
-  -f, --fields string    List of fields (required) --fields='Title:string, Description:string, UserID:int64'
-  -h, --help             help for generate
-  -n, --name string      Resource name (required) --name='ModelName'
-      --onlyModel        Create only model (default = false)
-      --public           Public resource (default = false)
-```
-**Example:** To create a *Comment* resource with *title, body* and *user_id* fields run the following command:
-```
-rgen generate -n "Comment" -f "title:string#required|min:5, body:string#required, user_id:int64#required" -a "index, create, delete"
-```
-### TODO
+Here's a more detailed explanation of how to use the `rgen generate` command:
+- `-n, --name string`: This specifies the name of the resource. For example, `--name='ModelName'`.
+- `-f, --fields string`: This specifies the list of fields for the resource. For example, `--fields='Title:string, Description:string, UserID:int64'`.
+- `-a, --actions string`: This specifies the CRUD actions for the resource. For example, `--actions='index,create,show,update,delete'`.
+- `--onlyModel`: This specifies whether to only create a model. The default value is false.
+- `--public`: This specifies whether the resource is public. The default value is false.
 - [ ] Add support for more databases (currently only *MySQL* is supported)
 
 **PRs are welcome**
+### Contributing
+We welcome contributions to this project. Here's how you can contribute:
+- Submit pull requests: If you've fixed a bug or implemented a new feature, please submit a pull request.
+- Report issues: If you've found a bug or have a suggestion for a new feature, please report it as an issue.
+- Propose new features: If you have an idea for a new feature, please propose it as an issue.
